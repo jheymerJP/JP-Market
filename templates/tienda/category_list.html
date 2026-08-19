@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Categorias - JP Market{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Categorias</span>
+</div>
+
+<h1 class="page-title">Nuestras Categorias</h1>
+
+<div class="categories-grid">
+    {% for category in categories %}
+    <a href="{{ category.get_absolute_url }}" class="category-card category-card-lg" data-animate>
+        {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+        {% else %}
+            <div class="category-placeholder"><i class="fas fa-tag"></i></div>
+        {% endif %}
+        <div class="category-info">
+            <h3>{{ category.name }}</h3>
+            <p>{{ category.description|default:"Explora nuestra coleccion de productos" }}</p>
+            <span class="btn btn-outline">Ver Productos <i class="fas fa-arrow-right"></i></span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

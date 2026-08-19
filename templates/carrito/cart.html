@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Carrito de Compras - JP Market{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Carrito</span>
+</div>
+
+<h1 class="page-title">Mi Carrito</h1>
+
+{% if items %}
+<div class="cart-layout">
+    <div class="cart-items">
+        {% for item in items %}
+        <div class="cart-item" data-animate>
+            <div class="cart-item-image">
+                <a href="{{ item.product.get_absolute_url }}">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                </a>
+            </div>
+            <div class="cart-item-details">
+                <h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3>
+                <p class="cart-item-price">${{ item.product.price|intcomma }}</p>
+            </div>
+            <div class="cart-item-actions">
+                <form action="{% url 'carrito:update_cart' item.id %}" method="POST" class="quantity-form">
+                    {% csrf_token %}
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:-1 }}" class="qty-btn" {% if item.quantity <= 1 %}disabled{% endif %}>
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="qty-value">{{ item.quantity }}</span>
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:1 }}" class="qty-btn" {% if item.quantity >= item.product.stock %}disabled{% endif %}>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="cart-item-subtotal">
+                <p>${{ item.subtotal|intcomma }}</p>
+            </div>
+            <a href="{% url 'carrito:remove_from_cart' item.id %}" class="cart-item-remove" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+        <h3><i class="fas fa-receipt"></i> Resumen del Pedido</h3>
+        <div class="summary-row">
+            <span>Subtotal ({{ cart.total_items }} items)</span>
+            <span>${{ cart.total|intcomma }}</span>
+        </div>
+        <div class="summary-row">
+            <span>Envio</span>
+            <span class="text-success"><i class="fas fa-check-circle"></i> Gratis</span>
+        </div>
+        <div class="summary-total">
+            <span>Total</span>
+            <span>${{ cart.total|intcomma }}</span>
+        </div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'carrito:checkout' %}" class="btn btn-primary btn-block btn-lg">
+            <i class="fas fa-lock"></i> Proceder al Pago
+        </a>
+        {% else %}
+        <p class="login-required-text">Inicia sesion para continuar</p>
+        <a href="{% url 'cuentas:login' %}?next={% url 'carrito:checkout' %}" class="btn btn-primary btn-block btn-lg">
+            <i class="fas fa-sign-in-alt"></i> Iniciar Sesion
+        </a>
+        {% endif %}
+        <a href="{% url 'tienda:product_list' %}" class="btn btn-outline btn-block">
+            <i class="fas fa-arrow-left"></i> Seguir Comprando
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-shopping-cart"></i>
+    <h2>Tu carrito esta vacio</h2>
+    <p>Agrega productos para comenzar a comprar en JP Market</p>
+    <a href="{% url 'tienda:product_list' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-shopping-bag"></i> Ver Productos
+    </a>
+</div>
+{% endif %}
+{% endblock %}

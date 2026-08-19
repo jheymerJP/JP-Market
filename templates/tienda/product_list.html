@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Productos - JP Market{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Productos</span>
+</div>
+
+<h1 class="page-title">Todos los Productos</h1>
+
+<div class="filters-bar">
+    <form class="search-inline" action="" method="GET">
+        <input type="text" name="q" placeholder="Buscar productos..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+    <span class="results-count"><i class="fas fa-box"></i> {{ products.count }} productos encontrados</span>
+</div>
+
+{% if products %}
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card" data-animate>
+        <a href="{{ product.get_absolute_url }}" class="product-image">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% if product.featured %}
+                <span class="badge badge-featured"><i class="fas fa-star"></i> Destacado</span>
+            {% endif %}
+            {% if product.stock == 0 %}
+                <span class="badge badge-out">Agotado</span>
+            {% endif %}
+        </a>
+        <div class="product-info">
+            <span class="product-category">{{ product.category.name }}</span>
+            <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+            <p class="product-price">${{ product.price|intcomma }}</p>
+            {% if product.stock > 0 %}
+            <form action="{% url 'carrito:add_to_cart' product.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                </button>
+            </form>
+            {% else %}
+            <button class="btn btn-disabled btn-block"><i class="fas fa-ban"></i> Agotado</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-box-open"></i>
+    <h2>No se encontraron productos</h2>
+    <p>Intenta con otra busqueda o explora nuestras categorias</p>
+    <a href="{% url 'tienda:category_list' %}" class="btn btn-primary"><i class="fas fa-th-large"></i> Ver Categorias</a>
+</div>
+{% endif %}
+{% endblock %}

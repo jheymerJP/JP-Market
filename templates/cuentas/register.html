@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Registro - JP Market{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="auth-icon"><i class="fas fa-user-plus"></i></span>
+            <h1>Crear Cuenta</h1>
+            <p>Unete a JP Market y empieza a comprar</p>
+        </div>
+
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {% if field.name == 'username' %}<i class="fas fa-user"></i>
+                    {% elif field.name == 'email' %}<i class="fas fa-envelope"></i>
+                    {% elif 'password' in field.name %}<i class="fas fa-lock"></i>
+                    {% endif %} {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                    <span class="field-error"><i class="fas fa-exclamation-circle"></i> {{ field.errors.0 }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fas fa-user-plus"></i> Crear Cuenta
+            </button>
+        </form>
+
+        <div class="auth-divider">
+            <span>o registate con</span>
+        </div>
+
+        <a href="{% url 'google_login' %}" class="btn btn-google btn-block">
+            <i class="fab fa-google"></i> Google
+        </a>
+
+        <div class="auth-footer">
+            <p>Ya tienes cuenta? <a href="{% url 'cuentas:login' %}">Inicia sesion</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

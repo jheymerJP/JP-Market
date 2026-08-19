@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil - JP Market{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Mi Perfil</span>
+</div>
+
+<div class="profile-container">
+    <div class="profile-sidebar">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h2>{{ user.username }}</h2>
+        <p>{{ user.email }}</p>
+        <div class="profile-nav">
+            <a href="{% url 'cuentas:profile' %}" class="profile-nav-link active">
+                <i class="fas fa-user-circle"></i> Mi Perfil
+            </a>
+            <a href="{% url 'cuentas:edit_profile' %}" class="profile-nav-link">
+                <i class="fas fa-pen"></i> Editar Perfil
+            </a>
+            <a href="{% url 'carrito:order_history' %}" class="profile-nav-link">
+                <i class="fas fa-box"></i> Mis Pedidos
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}" class="profile-nav-link">
+                <i class="fas fa-cog"></i> Administracion
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-main">
+        <h2>Mi Informacion</h2>
+        <div class="profile-info-grid">
+            <div class="info-item">
+                <label><i class="fas fa-user"></i> Usuario</label>
+                <p>{{ user.username }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <p>{{ user.email }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-id-card"></i> Nombre</label>
+                <p>{{ user.first_name|default:"No especificado" }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-id-card"></i> Apellido</label>
+                <p>{{ user.last_name|default:"No especificado" }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-phone"></i> Telefono</label>
+                <p>{{ user.profile.phone|default:"No especificado" }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-location-dot"></i> Direccion</label>
+                <p>{{ user.profile.address|default:"No especificado" }}</p>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-city"></i> Ciudad</label>
+                <p>{{ user.profile.city|default:"No especificado" }}</p>
+            </div>
+        </div>
+        <a href="{% url 'cuentas:edit_profile' %}" class="btn btn-primary">
+            <i class="fas fa-pen"></i> Editar Perfil
+        </a>
+    </div>
+</div>
+{% endblock %}
