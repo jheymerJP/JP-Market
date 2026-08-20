@@ -1,23 +1,24 @@
 {% extends 'panel_admin/base_admin.html' %}
-{% block title %}Editar Cupon - Panel Admin{% endblock %}
-{% block topbar_title %}Editar Cupon{% endblock %}
-
+{% block title %}Editar Cupon - JP Market Admin{% endblock %}
+{% block page_title %}Editar Cupon: {{ cupon.codigo }}{% endblock %}
 {% block content %}
-<div class="panel-card" style="max-width: 500px;">
-    <h3><i class="fas fa-pen"></i> Editar Cupon: {{ cupon.codigo }}</h3>
-    <form method="POST">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label>{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}<small style="color: var(--gray);">{{ field.help_text }}</small>{% endif %}
-        </div>
-        {% endfor %}
-        <div style="display: flex; gap: 12px;">
+<div class="content-card" style="max-width:600px">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group"><label>Codigo</label>{{ form.codigo }}</div>
+            <div class="form-row">
+                <div class="form-group"><label>Descuento (%)</label>{{ form.descuento }}</div>
+                <div class="form-group"><label>Minimo Compra</label>{{ form.minimo_compra }}</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Usos Maximos</label>{{ form.uso_maximo }}</div>
+                <div class="form-group"><label>Expira</label>{{ form.expira }}</div>
+            </div>
+            <div class="form-group"><label><input type="checkbox" name="activo" {% if cupon.activo %}checked{% endif %}> Activo</label></div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
-            <a href="{% url 'panel_admin:cupones' %}" class="btn btn-outline"><i class="fas fa-times"></i> Cancelar</a>
-        </div>
-    </form>
+            <a href="{% url 'panel_admin:cupones' %}" class="btn btn-outline">Cancelar</a>
+        </form>
+    </div>
 </div>
 {% endblock %}

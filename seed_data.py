@@ -7,76 +7,84 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
 from tienda.models import Category, Product
-from django.core.files.base import ContentFile
-import io
-from PIL import Image
 
+categories_data = [
+    {'name': 'Bebidas', 'description': 'Gaseosas, jugos, agua y bebidas en general'},
+    {'name': 'Lacteos', 'description': 'Leche, queso, yogurt y productos lacteos'},
+    {'name': 'Panaderia', 'description': 'Pan, tortas, galletas y reposteria'},
+    {'name': 'Frutas y Verduras', 'description': 'Frutas frescas y verduras de temporada'},
+    {'name': 'Limpieza', 'description': 'Productos de aseo y limpieza del hogar'},
+    {'name': 'Carnes', 'description': 'Carnes frescas, pollo y pescados'},
+    {'name': 'Snacks', 'description': 'Papas fritas, mani, galletas y botanas'},
+    {'name': 'Abarrotes', 'description': 'Arroz, aceite, fideos, conservas y mas'},
+]
 
-def create_placeholder_image(name, size=(400, 400), color=(37, 99, 235)):
-    img = Image.new('RGB', size, color)
-    buf = io.BytesIO()
-    img.save(buf, 'JPEG')
-    return ContentFile(buf.getvalue(), f'{name}.jpg')
+products_data = {
+    'Bebidas': [
+        ('Inca Kola 1.5L', 'Gaseosa sabor original peruana', 5.50, 50),
+        ('Coca Cola 500ml', 'Gaseosa Coca Cola botella personal', 2.50, 80),
+        ('Agua San Luis 625ml', 'Agua purificada', 1.80, 100),
+        ('Jugo D\'Norte 1L', 'Jugo de naranja natural', 4.20, 35),
+    ],
+    'Lacteos': [
+        ('Leche Gloria 400g', 'Leche evaporada entera', 3.80, 60),
+        ('Queso Paria 400g', 'Queso fresco peruano', 8.50, 25),
+        ('Yogurt Laive 170g', 'Yogurt de fresa', 2.20, 40),
+        ('Mantequilla Primor 200g', 'Mantequilla con sal', 6.80, 20),
+    ],
+    'Panaderia': [
+        ('Pan Frances (6u)', 'Pan frances fresco de la hornada', 3.50, 30),
+        ('Pan Wawa', 'Pan dulce relleno de manjar', 1.80, 40),
+        ('Torta Tres Leches', 'Porcion de torta tres leches', 8.00, 10),
+        ('Galletas Casino 145g', 'Galletas sabor choco', 3.20, 25),
+    ],
+    'Frutas y Verduras': [
+        ('Platano Grande (1kg)', 'Platano fresco de la costa', 3.00, 50),
+        ('Palta Hass (1kg)', 'Palta Hass importada', 15.90, 15),
+        ('Tomate (1kg)', 'Tomate fresco nacional', 4.50, 40),
+        ('Cebolla (1kg)', 'Cebolla roja criolla', 3.80, 35),
+    ],
+    'Limpieza': [
+        ('Detergente Aromax 500g', 'Detergente en polvo para ropa', 6.50, 30),
+        ('Cloro Clorox 1L', 'Desinfectante multi-uso', 5.20, 25),
+        ('Jabon Asepxia 3u', 'Jabon limpiador facial', 7.80, 15),
+        ('Bolsa Basura 30L', 'Rollo de 25 bolsas', 4.50, 40),
+    ],
+    'Carnes': [
+        ('Pechuga de Pollo 1kg', 'Pechuga fresca sin hueso', 14.90, 30),
+        ('Carne Molida 1kg', 'Carne molida de res', 18.50, 20),
+        ('Chuleta de Cerdo 1kg', 'Chuletas frescas de cerdo', 16.80, 15),
+        ('Tilapia Entera 1kg', 'Tilapia fresca de acquicultura', 12.90, 12),
+    ],
+    'Snacks': [
+        ('Papas Lay\'s 150g', 'Papas fritas sabor original', 4.50, 40),
+        ('Mani Moli 200g', 'Mani salado tostado', 3.80, 30),
+        ('Golpe 100g', 'Snack de maiz sabor pollo', 2.50, 50),
+        ('Crocantels 250g', 'Galletas de soda', 3.20, 25),
+    ],
+    'Abarrotes': [
+        ('Arroz Costeno 1kg', 'Arroz grano largo', 3.50, 80),
+        ('Aceite Primor 900ml', 'Aceite vegetal de palma', 8.90, 40),
+        ('Fideos Don Victor 500g', 'Spaghetti al huevo', 3.20, 35),
+        ('Atun Florida 170g', 'Atun en aceite de oliva', 5.80, 30),
+    ],
+}
 
+print('Creando categorias...')
+for c_data in categories_data:
+    cat, created = Category.objects.get_or_create(name=c_data['name'], defaults={'description': c_data['description']})
+    if created:
+        print(f'  + {cat.name}')
 
-def seed():
-    categories_data = [
-        {'name': 'Electronica', 'slug': 'electronica', 'description': 'Celulares, tablets, audifonos y mas', 'order': 1},
-        {'name': 'Ropa', 'slug': 'ropa', 'description': 'Moda para toda la familia', 'order': 2},
-        {'name': 'Hogar', 'slug': 'hogar', 'description': 'Todo para tu hogar', 'order': 3},
-        {'name': 'Deportes', 'slug': 'deportes', 'description': 'Articulos deportivos', 'order': 4},
-        {'name': 'Belleza', 'slug': 'belleza', 'description': 'Productos de cuidado personal', 'order': 5},
-        {'name': 'Tecnologia', 'slug': 'tecnologia', 'description': 'Accesorios y gadgets tecnologicos', 'order': 6},
-    ]
-
-    categories = {}
-    for data in categories_data:
-        cat, created = Category.objects.get_or_create(slug=data['slug'], defaults=data)
-        categories[data['slug']] = cat
+print('Creando productos...')
+for cat_name, products in products_data.items():
+    cat = Category.objects.get(name=cat_name)
+    for name, desc, price, stock in products:
+        p, created = Product.objects.get_or_create(
+            name=name, category=cat,
+            defaults={'description': desc, 'price': price, 'stock': stock}
+        )
         if created:
-            img = create_placeholder_image(f'cat_{data["slug"]}', (400, 300))
-            cat.image.save(f'cat_{data["slug"]}.jpg', img, save=True)
-            print(f'  Categoria creada: {cat.name}')
+            print(f'  + {p.name} (S/.{price})')
 
-    products_data = [
-        {'name': 'iPhone 15 Pro', 'slug': 'iphone-15-pro', 'description': 'El iPhone mas avanzado con chip A17 Pro, camara de 48MP y pantalla Super Retina XDR de 6.1 pulgadas.', 'price': 4999000, 'stock': 15, 'featured': True, 'category': 'electronica', 'color': (0, 122, 255)},
-        {'name': 'Samsung Galaxy S24', 'slug': 'samsung-galaxy-s24', 'description': 'Smartphone Samsung con pantalla Dynamic AMOLED 2X de 6.2 pulgadas y camara de 50MP.', 'price': 3599000, 'stock': 20, 'featured': True, 'category': 'electronica', 'color': (30, 30, 30)},
-        {'name': 'AirPods Pro 2', 'slug': 'airpods-pro-2', 'description': 'Audifonos inalambricos con cancelacion activa de ruido y audio espacial.', 'price': 899000, 'stock': 30, 'featured': True, 'category': 'electronica', 'color': (240, 240, 240)},
-        {'name': 'iPad Air', 'slug': 'ipad-air', 'description': 'Tablet Apple con chip M1, pantalla Liquid Retina de 10.9 pulgadas.', 'price': 2799000, 'stock': 10, 'category': 'electronica', 'color': (100, 100, 100)},
-
-        {'name': 'Camiseta Basica', 'slug': 'camiseta-basica', 'description': 'Camiseta de algodon 100%, disponible en varios colores. Perfecta para el dia a dia.', 'price': 45000, 'stock': 50, 'featured': True, 'category': 'ropa', 'color': (37, 99, 235)},
-        {'name': 'Jean Clasico', 'slug': 'jean-clasico', 'description': 'Jean de mezclilla clasico, ajuste regular, comodo y duradero.', 'price': 120000, 'stock': 35, 'category': 'ropa', 'color': (50, 80, 150)},
-        {'name': 'Zapatillas Running', 'slug': 'zapatillas-running', 'description': 'Zapatillas deportivas para running con amortiguacion premium.', 'price': 280000, 'stock': 25, 'featured': True, 'category': 'ropa', 'color': (220, 50, 50)},
-        {'name': 'Chaqueta Impermeable', 'slug': 'chaqueta-impermeable', 'description': 'Chaqueta tecnica impermeable, ideal para lluvia y viento.', 'price': 180000, 'stock': 15, 'category': 'ropa', 'color': (40, 40, 40)},
-
-        {'name': 'Aspiradora Robot', 'slug': 'aspiradora-robot', 'description': 'Aspiradora robot con navegacion inteligente y limpieza automatica.', 'price': 899000, 'stock': 8, 'featured': True, 'category': 'hogar', 'color': (50, 200, 50)},
-        {'name': 'Juego de Sartenes', 'slug': 'juego-de-sartenes', 'description': 'Set de 5 sartenes antiadherentes de alta calidad.', 'price': 250000, 'stock': 12, 'category': 'hogar', 'color': (180, 180, 180)},
-        {'name': 'Cama Queen', 'slug': 'cama-queen', 'description': 'Cama queen size con cabecera tapizada y almacenamiento.', 'price': 1200000, 'stock': 5, 'category': 'hogar', 'color': (139, 90, 43)},
-
-        {'name': 'Balon de Futbol', 'slug': 'balon-futbol', 'description': 'Balon de futbol profesional tamaño 5, material PU de alta calidad.', 'price': 85000, 'stock': 40, 'featured': True, 'category': 'deportes', 'color': (255, 255, 255)},
-        {'name': 'Mancuernas Set', 'slug': 'mancuernas-set', 'description': 'Set de mancuernas ajustables de 2 a 20 kg.', 'price': 350000, 'stock': 10, 'category': 'deportes', 'color': (60, 60, 60)},
-        {'name': 'Bicicleta Montaña', 'slug': 'bicicleta-montana', 'description': 'Bicicleta de montaña 21 velocidades con frenos de disco.', 'price': 1500000, 'stock': 7, 'category': 'deportes', 'color': (200, 30, 30)},
-
-        {'name': 'Perfume Premium', 'slug': 'perfume-premium', 'description': 'Fragancia premium para hombre, notas de madera y cuero. 100ml.', 'price': 220000, 'stock': 20, 'featured': True, 'category': 'belleza', 'color': (80, 20, 80)},
-        {'name': 'Kit Cuidado Facial', 'slug': 'kit-cuidado-facial', 'description': 'Kit completo de limpieza y cuidado facial con 6 productos.', 'price': 150000, 'stock': 18, 'category': 'belleza', 'color': (200, 180, 160)},
-
-        {'name': 'Smartwatch Pro', 'slug': 'smartwatch-pro', 'description': 'Reloj inteligente con GPS, monitor de ritmo cardiaco y 7 dias de bateria.', 'price': 599000, 'stock': 22, 'featured': True, 'category': 'tecnologia', 'color': (20, 20, 20)},
-        {'name': 'Cargador Inalambrico', 'slug': 'cargador-inalambrico', 'description': 'Cargador inalambrico rapido 15W compatible con todos los smartphones.', 'price': 65000, 'stock': 45, 'category': 'tecnologia', 'color': (240, 240, 240)},
-        {'name': 'Audifonos Bluetooth', 'slug': 'audifonos-bluetooth', 'description': 'Audifonos bluetooth over-ear con 30 horas de bateria.', 'price': 180000, 'stock': 28, 'category': 'tecnologia', 'color': (50, 50, 50)},
-    ]
-
-    for data in products_data:
-        cat_slug = data.pop('category')
-        color = data.pop('color')
-        data['category'] = categories[cat_slug]
-        product, created = Product.objects.get_or_create(slug=data['slug'], defaults=data)
-        if created:
-            img = create_placeholder_image(f'prod_{data["slug"]}', (400, 400), color)
-            product.image.save(f'prod_{data["slug"]}.jpg', img, save=True)
-            print(f'  Producto creado: {product.name}')
-
-    print('\nBase de datos poblada exitosamente!')
-
-
-if __name__ == '__main__':
-    seed()
+print(f'Done! {Category.objects.count()} categorias, {Product.objects.count()} productos creados.')

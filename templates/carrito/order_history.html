@@ -1,49 +1,51 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load static humanize %}
 {% block title %}Mis Pedidos - JP Market{% endblock %}
-
 {% block content %}
-<div class="breadcrumb">
-    <a href="{% url 'tienda:home' %}">Inicio</a> /
-    <a href="{% url 'cuentas:profile' %}">Mi Cuenta</a> /
-    <span>Mis Pedidos</span>
-</div>
-
-<h1 class="page-title">Mis Pedidos</h1>
-
-{% if orders %}
-<div class="orders-list">
-    {% for order in orders %}
-    <div class="order-card" data-animate>
-        <div class="order-card-header">
-            <div>
-                <span class="order-id"><i class="fas fa-hashtag"></i> {{ order.order_id|truncatechars:8 }}</span>
-                <span class="order-date"><i class="fas fa-calendar"></i> {{ order.created|date:"d/m/Y H:i" }}</span>
-            </div>
-            <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2><i class="fas fa-box"></i> Mis Pedidos</h2>
+            <p>Historial de tus compras en JP Market</p>
+            <div class="line"></div>
         </div>
-        <div class="order-card-body">
-            {% for item in order.items.all %}
-            <div class="order-item-row">
-                <span>{{ item.quantity }}x {{ item.product.name }}</span>
-                <span>${{ item.subtotal|intcomma }}</span>
+
+        {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-id">#{{ order.order_id }}</span>
+                    <span class="order-date">{{ order.created|date:"d/m/Y H:i" }}</span>
+                    <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="order-body">
+                    {% for item in order.items.all %}
+                    <div class="order-item">
+                        <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                        <span>S/.{{ item.subtotal|intcomma }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-footer">
+                    <span class="order-total">Total: <strong>S/.{{ order.total|intcomma }}</strong></span>
+                    <div style="display:flex;gap:.5rem">
+                        <a href="{% url 'carrito:tracking' order.order_id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-truck"></i> Rastrear
+                        </a>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
-        <div class="order-card-footer">
-            <span class="order-total">Total: ${{ order.total|intcomma }}</span>
+        {% else %}
+        <div class="empty-state" style="text-align:center;padding:4rem 0">
+            <i class="fas fa-shopping-bag" style="font-size:5rem;color:#ddd;margin-bottom:1rem"></i>
+            <h3>No tienes pedidos aun</h3>
+            <p style="color:#666;margin-bottom:1.5rem">Empieza a comprar en JP Market!</p>
+            <a href="{% url 'tienda:product_list' %}" class="btn btn-primary">Ver Productos</a>
         </div>
+        {% endif %}
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="empty-state">
-    <i class="fas fa-box"></i>
-    <h2>No tienes pedidos aun</h2>
-    <p>Explora nuestros productos y haz tu primera compra</p>
-    <a href="{% url 'tienda:product_list' %}" class="btn btn-primary btn-lg">
-        <i class="fas fa-shopping-bag"></i> Empezar a Comprar
-    </a>
-</div>
-{% endif %}
+</section>
 {% endblock %}

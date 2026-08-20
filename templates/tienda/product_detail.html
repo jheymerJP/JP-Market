@@ -1,68 +1,158 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load static humanize %}
 {% block title %}{{ product.name }} - JP Market{% endblock %}
-
+{% block extra_css %}
+<style>
+.detail-section{padding:2rem 0}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.product-gallery{border-radius:16px;overflow:hidden;background:#f5f6fa;position:relative}
+.product-gallery img{width:100%;height:400px;object-fit:cover}
+.product-gallery .no-img{display:flex;align-items:center;justify-content:center;height:400px;font-size:5rem;color:#ddd}
+.product-detail-info h1{font-family:'Playfair Display',serif;font-size:2rem;color:#1a1a2e;margin-bottom:.5rem}
+.product-detail-info .category-badge{display:inline-block;background:#f0f0ff;color:#6c63ff;padding:.4rem 1rem;border-radius:20px;font-size:.85rem;font-weight:600;margin-bottom:1rem}
+.product-detail-info .price{font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,#6c63ff,#e91e63);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:1rem 0}
+.product-detail-info .stock-info{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.9rem}
+.stock-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.stock-dot.in-stock{background:#4caf50}
+.stock-dot.low-stock{background:#ff9800}
+.stock-dot.out-stock{background:#f44336}
+.product-detail-info .description{color:#555;line-height:1.8;margin:1.5rem 0;padding:1.5rem;background:#f9f9f9;border-radius:12px}
+.product-detail-info .rating{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;color:#ffc107}
+.quantity-selector{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
+.qty-btn{width:40px;height:40px;border-radius:50%;border:2px solid #e0e0e0;background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.qty-btn:hover{border-color:#6c63ff;color:#6c63ff}
+.qty-input{width:60px;height:40px;border:2px solid #e0e0e0;border-radius:8px;text-align:center;font-size:1.1rem;font-weight:600}
+.detail-actions{display:flex;gap:1rem;margin-top:1.5rem}
+.btn-add-cart{flex:1;padding:1rem;border:none;border-radius:12px;background:linear-gradient(135deg,#6c63ff,#e91e63);color:#fff;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.btn-add-cart:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,.4)}
+.btn-whatsapp{padding:1rem 1.5rem;border:2px solid #25d366;border-radius:12px;background:transparent;color:#25d366;font-size:1.1rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:.5rem;text-decoration:none}
+.btn-whatsapp:hover{background:#25d366;color:#fff}
+.related-section{padding:2rem 0;margin-top:2rem;border-top:1px solid #eee}
+.reviews-section{padding:2rem 0;margin-top:2rem;border-top:1px solid #eee}
+.review-card{background:#f9f9f9;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.review-card .review-header{display:flex;justify-content:space-between;margin-bottom:.5rem}
+.review-card .review-user{font-weight:600;color:#1a1a2e}
+.review-card .review-rating{color:#ffc107}
+.review-card .review-date{font-size:.8rem;color:#999}
+.review-card .review-title{font-weight:600;margin-bottom:.25rem}
+.review-card .review-text{color:#555;font-size:.9rem}
+@media(max-width:768px){.detail-grid{grid-template-columns:1fr;gap:1.5rem}.product-gallery img{height:250px}}
+</style>
+{% endblock %}
 {% block content %}
-<div class="breadcrumb">
-    <a href="{% url 'tienda:home' %}">Inicio</a> /
-    <a href="{% url 'tienda:category_list' %}">Categorias</a> /
-    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a> /
-    <span>{{ product.name }}</span>
-</div>
-
-<div class="product-detail">
-    <div class="product-detail-image">
-        <img src="{{ product.image.url }}" alt="{{ product.name }}">
-    </div>
-    <div class="product-detail-info">
-        <span class="product-category">{{ product.category.name }}</span>
-        <h1>{{ product.name }}</h1>
-        <p class="product-price-lg">${{ product.price|intcomma }}</p>
-        <div class="product-stock">
-            {% if product.stock > 0 %}
-                <span class="stock-available"><i class="fas fa-check-circle"></i> En stock ({{ product.stock }} unidades)</span>
-            {% else %}
-                <span class="stock-out"><i class="fas fa-times-circle"></i> Agotado</span>
-            {% endif %}
-        </div>
-        <div class="product-description">
-            <h3>Descripcion del Producto</h3>
-            <p>{{ product.description }}</p>
-        </div>
-        {% if product.stock > 0 %}
-        <form action="{% url 'carrito:add_to_cart' product.id %}" method="POST" class="add-to-cart-form">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-cart-plus"></i> Agregar al Carrito
-            </button>
-        </form>
-        {% endif %}
-    </div>
-</div>
-
-{% if related %}
-<section class="section">
-    <h2 class="section-title">Productos Relacionados</h2>
-    <div class="products-grid">
-        {% for product in related %}
-        <div class="product-card" data-animate>
-            <a href="{{ product.get_absolute_url }}" class="product-image">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}">
-            </a>
-            <div class="product-info">
-                <span class="product-category">{{ product.category.name }}</span>
-                <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
-                <p class="product-price">${{ product.price|intcomma }}</p>
-                <form action="{% url 'carrito:add_to_cart' product.id %}" method="POST">
+<section class="detail-section">
+    <div class="container">
+        <div class="detail-grid">
+            <div class="product-gallery">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <div class="no-img"><i class="fas fa-image"></i></div>
+                {% endif %}
+            </div>
+            <div class="product-detail-info">
+                <span class="category-badge">{{ product.category.name }}</span>
+                <h1>{{ product.name }}</h1>
+                <div class="rating">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= product.average_rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% endfor %}
+                    <span>({{ product.reviews.count }} resenas)</span>
+                </div>
+                <div class="price">S/.{{ product.price|intcomma }}</div>
+                <div class="stock-info">
+                    {% if product.stock > 5 %}
+                        <span class="stock-dot in-stock"></span> En stock ({{ product.stock }} unidades)
+                    {% elif product.stock > 0 %}
+                        <span class="stock-dot low-stock"></span> Ultimas {{ product.stock }} unidades
+                    {% else %}
+                        <span class="stock-dot out-stock"></span> Agotado
+                    {% endif %}
+                </div>
+                <div class="description">{{ product.description }}</div>
+                {% if product.is_available %}
+                <form method="POST" action="{% url 'carrito:add_to_cart' product.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-cart-plus"></i> Agregar al Carrito
-                    </button>
+                    <div class="quantity-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty(-1)">-</button>
+                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input" id="qty-input">
+                        <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                    </div>
+                    <div class="detail-actions">
+                        <button type="submit" class="btn-add-cart">
+                            <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                        </button>
+                        <a href="https://wa.me/51999888777?text=Hola%20quiero%20el%20producto%20{{ product.name|urlencode }}" target="_blank" class="btn-whatsapp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
                 </form>
+                {% else %}
+                <div class="detail-actions">
+                    <button class="btn-add-cart" disabled style="opacity:.5">
+                        <i class="fas fa-ban"></i> No Disponible
+                    </button>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
+
+        {% if reviews %}
+        <div class="reviews-section">
+            <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem"><i class="fas fa-comments"></i> Resenas ({{ reviews.count }})</h2>
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="review-user"><i class="fas fa-user-circle"></i> {{ review.user.username }}</span>
+                    <span class="review-rating">
+                        {% for i in "12345" %}{% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}{% endfor %}
+                    </span>
+                </div>
+                <div class="review-title">{{ review.titulo }}</div>
+                <div class="review-text">{{ review.comentario }}</div>
+                <div class="review-date">{{ review.created|date:"d/m/Y" }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if related %}
+        <div class="related-section">
+            <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem"><i class="fas fa-link"></i> Productos Relacionados</h2>
+            <div class="products-grid">
+                {% for p in related %}
+                <div class="product-card">
+                    <div class="product-img">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.name }}">
+                        {% else %}
+                            <span class="no-img"><i class="fas fa-image"></i></span>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">{{ p.category.name }}</span>
+                        <h3 class="product-name"><a href="{% url 'tienda:product_detail' p.id %}">{{ p.name }}</a></h3>
+                        <div class="product-bottom">
+                            <div class="product-price">S/.{{ p.price|intcomma }}</div>
+                            <a href="{% url 'carrito:add_to_cart' p.id %}" class="add-cart-btn"><i class="fas fa-cart-plus"></i></a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
-{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script>
+function changeQty(delta){
+    const input=document.getElementById('qty-input');
+    let val=parseInt(input.value)+delta;
+    if(val<1)val=1;
+    if(val>parseInt(input.max))val=parseInt(input.max);
+    input.value=val;
+}
+</script>
 {% endblock %}

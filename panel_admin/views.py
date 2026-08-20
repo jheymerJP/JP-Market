@@ -1,334 +1,202 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.http import HttpResponse
 from django.db.models import Sum, Count, Q
-from django.utils import timezone
-from datetime import timedelta
-from carrito.models import Order, OrderItem
-from tienda.models import Product, Category
-from .models import Pago, Cupon, Review, Notificacion, Banner, Boleta, Factura
+from .models import Pago, Boleta, Factura, Cupon, Review, Banner, Notificacion
 from .forms import CuponForm, BannerForm
 from .services import AdminDashboard
+from carrito.models import Order, OrderItem
+from tienda.models import Product, Category
 
 
-@staff_member_required(login_url='cuentas:login')
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('cuentas:login')
+        if not request.user.is_staff:
+            return redirect('tienda:home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+@admin_required
 def dashboard(request):
     stats = AdminDashboard.get_stats()
     return render(request, 'panel_admin/dashboard.html', stats)
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def ventas(request):
-    pedidos = Order.objects.select_related('user').all()
-    estado = request.GET.get('estado', '')
-    busqueda = request.GET.get('q', '')
-    if estado:
-        pedidos = pedidos.filter(status=estado)
-    if busqueda:
-        pedidos = pedidos.filter(
-            Q(full_name__icontains=busqueda) |
-            Q(email__icontains=busqueda) |
-            Q(order_id__icontains=busqueda)
-        )
-    return render(request, 'panel_admin/ventas.html', {
-        'pedidos': pedidos,
-        'estado_actual': estado,
-        'busqueda': busqueda,
-    })
+    orders = Order.objects.select_related('user').all()
+    status = request.GET.get('status', '')
+    q = request.GET.get('q', '')
+    if status:
+        orders = orders.filter(status=status)
+    if q:
+        orders = orders.filter(Q(order_id__icontains=q) | Q(full_name__icontains=q))
 
-
-@staff_member_required(login_url='cuentas:login')
-def pedido_detail(request, order_id):
-    pedido = get_object_or_404(Order, order_id=order_id)
     if request.method == 'POST':
-        pedido.status = request.POST.get('status', pedido.status)
-        pedido.save()
-        messages.success(request, 'Pedido actualizado exitosamente.')
-        return redirect('panel_admin:ventas')
-    return render(request, 'panel_admin/pedido_detail.html', {'pedido': pedido})
+        action = request.POST.get('action')
+        if action == 'cambiar_estado':
+            order_id = request.POST.get('order_id')
+            new_status = request.POST.get('new_status')
+            Order.objects.filter(order_id=order_id).update(status=new_status)
+            messages.success(request, f'Pedido {order_id} actualizado a {new_status}')
+
+    return render(request, 'panel_admin/ventas.html', {'orders': orders, 'status': status, 'q': q})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def clientes(request):
-    busqueda = request.GET.get('q', '')
-    clientes_list = User.objects.filter(is_staff=False).select_related('profile')
-    if busqueda:
-        clientes_list = clientes_list.filter(
-            Q(username__icontains=busqueda) |
-            Q(email__icontains=busqueda) |
-            Q(first_name__icontains=busqueda) |
-            Q(last_name__icontains=busqueda)
+    users = User.objects.filter(is_staff=False).select_related('profile').order_by('-date_joined')
+    q = request.GET.get('q', '')
+    if q:
+        users = users.filter(
+            Q(username__icontains=q) | Q(email__icontains=q) |
+            Q(first_name__icontains=q) | Q(last_name__icontains=q)
         )
-    total_clientes = User.objects.filter(is_staff=False).count()
-    return render(request, 'panel_admin/clientes.html', {
-        'clientes': clientes_list,
-        'busqueda': busqueda,
-        'total_clientes': total_clientes,
-    })
+    return render(request, 'panel_admin/clientes.html', {'users': users, 'q': q})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def cliente_detail(request, user_id):
-    cliente = get_object_or_404(User, id=user_id, is_staff=False)
-    pedidos = Order.objects.filter(user=cliente)
-    total_gastado = pedidos.aggregate(total=Sum('total'))['total'] or 0
+    user_obj = get_object_or_404(User, id=user_id, is_staff=False)
+    orders = Order.objects.filter(user=user_obj).order_by('-created')
+    total_gastado = orders.aggregate(t=Sum('total'))['t'] or 0
     return render(request, 'panel_admin/cliente_detail.html', {
-        'cliente': cliente,
-        'pedidos': pedidos,
-        'total_gastado': total_gastado,
+        'cliente': user_obj,
+        'orders': orders,
+        'total_gastado': round(total_gastado, 2),
     })
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def productos(request):
-    busqueda = request.GET.get('q', '')
-    categoria = request.GET.get('cat', '')
-    productos_list = Product.objects.select_related('category').all()
-    if busqueda:
-        productos_list = productos_list.filter(
-            Q(name__icontains=busqueda) | Q(description__icontains=busqueda)
-        )
-    if categoria:
-        productos_list = productos_list.filter(category__slug=categoria)
-    categorias = Category.objects.all()
+    products = Product.objects.select_related('category').all()
+    q = request.GET.get('q', '')
+    cat = request.GET.get('cat', '')
+    if q:
+        products = products.filter(name__icontains=q)
+    if cat:
+        products = products.filter(category_id=cat)
+    categories = Category.objects.all()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        pid = request.POST.get('product_id')
+        if action == 'toggle':
+            Product.objects.filter(id=pid).update(activo=not Product.objects.get(id=pid).activo)
+            messages.success(request, 'Producto actualizado')
+        elif action == 'stock':
+            stock_val = int(request.POST.get('stock', 0))
+            Product.objects.filter(id=pid).update(stock=stock_val)
+            messages.success(request, 'Stock actualizado')
+
     return render(request, 'panel_admin/productos.html', {
-        'productos': productos_list,
-        'categorias': categorias,
-        'busqueda': busqueda,
-        'cat_actual': categoria,
+        'products': products, 'q': q, 'cat_id': cat, 'categories': categories,
     })
 
 
-@staff_member_required(login_url='cuentas:login')
-def producto_toggle(request, product_id):
-    producto = get_object_or_404(Product, id=product_id)
-    producto.available = not producto.available
-    producto.save()
-    return redirect('panel_admin:productos')
-
-
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def cupones(request):
-    form = CuponForm()
-    cupones_list = Cupon.objects.all()
     if request.method == 'POST':
         form = CuponForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Cupon creado exitosamente.')
+            messages.success(request, 'Cupon creado!')
             return redirect('panel_admin:cupones')
-    return render(request, 'panel_admin/cupones.html', {
-        'cupones': cupones_list,
-        'form': form,
-    })
+    else:
+        form = CuponForm()
+    cupones = Cupon.objects.all()
+    return render(request, 'panel_admin/cupones.html', {'cupones': cupones, 'form': form})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def cupon_editar(request, cupon_id):
     cupon = get_object_or_404(Cupon, id=cupon_id)
     if request.method == 'POST':
         form = CuponForm(request.POST, instance=cupon)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Cupon actualizado.')
+            messages.success(request, 'Cupon actualizado!')
             return redirect('panel_admin:cupones')
     else:
         form = CuponForm(instance=cupon)
     return render(request, 'panel_admin/cupon_form.html', {'form': form, 'cupon': cupon})
 
 
-@staff_member_required(login_url='cuentas:login')
-def cupon_delete(request, cupon_id):
-    cupon = get_object_or_404(Cupon, id=cupon_id)
-    cupon.delete()
-    messages.success(request, 'Cupon eliminado.')
+@admin_required
+def cupon_eliminar(request, cupon_id):
+    Cupon.objects.filter(id=cupon_id).delete()
+    messages.success(request, 'Cupon eliminado')
     return redirect('panel_admin:cupones')
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def reviews(request):
-    reviews_list = Review.objects.select_related('user', 'product').all()
-    return render(request, 'panel_admin/reviews.html', {'reviews': reviews_list})
+    reviews = Review.objects.select_related('user', 'product').all()
+    if request.method == 'POST':
+        rid = request.POST.get('review_id')
+        Review.objects.filter(id=rid).delete()
+        messages.success(request, 'Resena eliminada')
+    return render(request, 'panel_admin/reviews.html', {'reviews': reviews})
 
 
-@staff_member_required(login_url='cuentas:login')
-def review_delete(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
-    review.delete()
-    messages.success(request, 'Resena eliminada.')
-    return redirect('panel_admin:reviews')
-
-
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def banners(request):
     if request.method == 'POST':
         form = BannerForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Banner creado.')
+            messages.success(request, 'Banner creado!')
             return redirect('panel_admin:banners')
     else:
         form = BannerForm()
-    banners_list = Banner.objects.all()
-    return render(request, 'panel_admin/banners.html', {
-        'banners': banners_list,
-        'form': form,
-    })
+    banners = Banner.objects.all()
+    return render(request, 'panel_admin/banners.html', {'banners': banners, 'form': form})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
+def banner_eliminar(request, banner_id):
+    Banner.objects.filter(id=banner_id).delete()
+    messages.success(request, 'Banner eliminado')
+    return render(request, 'panel_admin/banners.html', {'banners': Banner.objects.all(), 'form': BannerForm()})
+
+
+@admin_required
 def boletas(request):
-    boletas_list = Boleta.objects.all()
-    return render(request, 'panel_admin/boletas.html', {'boletas': boletas_list})
+    boletas = Boleta.objects.select_related('order').all()
+    return render(request, 'panel_admin/boletas.html', {'boletas': boletas})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def boleta_detail(request, boleta_id):
     boleta = get_object_or_404(Boleta, id=boleta_id)
-    items = OrderItem.objects.filter(order=boleta.order)
+    items = boleta.order.items.select_related('product').all()
     return render(request, 'panel_admin/boleta_detail.html', {'boleta': boleta, 'items': items})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def facturas(request):
-    facturas_list = Factura.objects.all()
-    return render(request, 'panel_admin/facturas.html', {'facturas': facturas_list})
+    facturas = Factura.objects.select_related('order').all()
+    return render(request, 'panel_admin/facturas.html', {'facturas': facturas})
 
 
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def factura_detail(request, factura_id):
     factura = get_object_or_404(Factura, id=factura_id)
-    items = OrderItem.objects.filter(order=factura.order)
+    items = factura.order.items.select_related('product').all()
     return render(request, 'panel_admin/factura_detail.html', {'factura': factura, 'items': items})
 
 
-@staff_member_required(login_url='cuentas:login')
-def generar_boleta(request, order_id):
-    pedido = get_object_or_404(Order, order_id=order_id)
-    if Boleta.objects.filter(order=pedido).exists():
-        messages.warning(request, 'Ya existe una boleta para este pedido.')
-        return redirect('panel_admin:boletas')
-    subtotal = pedido.total
-    iva = subtotal * 0.19
-    boleta = Boleta.objects.create(
-        order=pedido,
-        cliente_nombre=pedido.full_name,
-        cliente_email=pedido.email,
-        cliente_direccion=pedido.address,
-        cliente_ciudad=pedido.city,
-        cliente_documento=request.POST.get('documento', ''),
-        subtotal=subtotal,
-        iva=iva,
-        total=subtotal + iva,
-        metodo_pago=request.POST.get('metodo_pago', 'No especificado'),
-    )
-    messages.success(request, f'Boleta {boleta.numero} generada.')
-    return redirect('panel_admin:boleta_detail', boleta_id=boleta.id)
-
-
-@staff_member_required(login_url='cuentas:login')
-def generar_factura(request, order_id):
-    pedido = get_object_or_404(Order, order_id=order_id)
-    if Factura.objects.filter(order=pedido).exists():
-        messages.warning(request, 'Ya existe una factura para este pedido.')
-        return redirect('panel_admin:facturas')
-    subtotal = pedido.total
-    iva = subtotal * 0.19
-    factura = Factura.objects.create(
-        order=pedido,
-        cliente_nombre=pedido.full_name,
-        cliente_email=pedido.email,
-        cliente_direccion=pedido.address,
-        cliente_ciudad=pedido.city,
-        cliente_nit=request.POST.get('nit', '000000000'),
-        subtotal=subtotal,
-        iva=iva,
-        total=subtotal + iva,
-        metodo_pago=request.POST.get('metodo_pago', 'No especificado'),
-    )
-    messages.success(request, f'Factura {factura.numero} generada.')
-    return redirect('panel_admin:factura_detail', factura_id=factura.id)
-
-
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def reportes(request):
-    hoy = timezone.now().date()
-    inicio_mes = hoy.replace(day=1)
-    inicio_año = hoy.replace(month=1, day=1)
-
-    ventas_hoy = Pago.objects.filter(estado='approved', created__date=hoy).aggregate(t=Sum('monto'))['t'] or 0
-    ventas_mes = Pago.objects.filter(estado='approved', created__date__gte=inicio_mes).aggregate(t=Sum('monto'))['t'] or 0
-    ventas_año = Pago.objects.filter(estado='approved', created__date__gte=inicio_año).aggregate(t=Sum('monto'))['t'] or 0
-
-    pedidos_hoy = Order.objects.filter(created__date=hoy).count()
-    pedidos_mes = Order.objects.filter(created__date__gte=inicio_mes).count()
-    pedidos_pendientes = Order.objects.filter(status='pending').count()
-
-    clientes_nuevos_mes = User.objects.filter(is_staff=False, date_joined__gte=inicio_mes).count()
-    clientes_total = User.objects.filter(is_staff=False).count()
-
-    productos_total = Product.objects.count()
-    productos_stock_bajo = Product.objects.filter(stock__lte=5, stock__gt=0).count()
-    productos_agotados = Product.objects.filter(stock=0).count()
-
-    ticket_promedio = Pago.objects.filter(
-        estado='approved', created__date__gte=inicio_mes
-    ).aggregate(t=Avg('monto'))['t'] or 0
-
-    top_productos = Product.objects.annotate(
-        vendidos=Count('orderitem')
-    ).order_by('-vendidos')[:10]
-
-    ventas_por_categoria = Category.objects.annotate(
-        total_ventas=Sum('products__orderitem__price')
-    ).order_by('-total_ventas')
-
-    pedidos_por_estado = Order.objects.values('status').annotate(
-        total=Count('id')
-    )
-
-    top_ciudades = Order.objects.values('city').annotate(
-        total=Count('id')
-    ).order_by('-total')[:10]
-
-    pagos_por_metodo = Pago.objects.filter(
-        estado='approved'
-    ).values('metodo_pago').annotate(
-        total=Sum('monto'),
-        cantidad=Count('id')
-    ).order_by('-total')
-
-    report_data = {
-        'ventas_hoy': ventas_hoy,
-        'ventas_mes': ventas_mes,
-        'ventas_año': ventas_año,
-        'pedidos_hoy': pedidos_hoy,
-        'pedidos_mes': pedidos_mes,
-        'pedidos_pendientes': pedidos_pendientes,
-        'clientes_nuevos_mes': clientes_nuevos_mes,
-        'clientes_total': clientes_total,
-        'productos_total': productos_total,
-        'productos_stock_bajo': productos_stock_bajo,
-        'productos_agotados': productos_agotados,
-        'ticket_promedio': ticket_promedio,
-        'top_productos': top_productos,
-        'ventas_por_categoria': ventas_por_categoria,
-        'pedidos_por_estado': pedidos_por_estado,
-        'top_ciudades': top_ciudades,
-        'pagos_por_metodo': pagos_por_metodo,
-    }
-
-    return render(request, 'panel_admin/reportes.html', report_data)
+    stats = AdminDashboard.get_stats()
+    return render(request, 'panel_admin/reportes.html', stats)
 
 
-from django.db.models import Avg
-
-
-@staff_member_required(login_url='cuentas:login')
+@admin_required
 def config(request):
-    if request.method == 'POST':
-        messages.success(request, 'Configuracion guardada.')
-        return redirect('panel_admin:config')
     return render(request, 'panel_admin/config.html')

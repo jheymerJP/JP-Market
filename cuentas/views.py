@@ -1,27 +1,23 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db.models import Q
+from allauth.socialaccount.models import SocialApp
 from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
+from .models import UserProfile
+from carrito.models import Order
 
 
-def register_view(request):
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return redirect('panel_admin:dashboard')
-        return redirect('tienda:home')
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, 'Cuenta creada exitosamente.')
-            return redirect('tienda:home')
-        else:
-            messages.error(request, 'Corrige los errores del formulario.')
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'cuentas/register.html', {'form': form})
+def google_login(request):
+    try:
+        SocialApp.objects.get(provider='google')
+        return redirect('socialaccount_login')
+    except SocialApp.DoesNotExist:
+        messages.error(request, 'Google login no esta configurado. Contacta al administrador.')
+        return redirect('cuentas:login')
 
 
 def login_view(request):
@@ -29,49 +25,74 @@ def login_view(request):
         if request.user.is_staff:
             return redirect('panel_admin:dashboard')
         return redirect('tienda:home')
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            messages.success(request, f'Bienvenido de vuelta, {user.username}!')
+            messages.success(request, f'Bienvenido {user.username}!')
             if user.is_staff:
                 return redirect('panel_admin:dashboard')
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
             return redirect('tienda:home')
         else:
-            messages.error(request, 'Usuario o contrasena incorrectos.')
-    return render(request, 'cuentas/login.html')
+            messages.error(request, 'Usuario o contrasena incorrectos')
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'cuentas/login.html', {'form': form})
 
 
-def logout_view(request):
-    logout(request)
-    messages.success(request, 'Sesion cerrada exitosamente.')
-    return redirect('tienda:home')
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('tienda:home')
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Cuenta creada exitosamente!')
+            return redirect('tienda:home')
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, 'cuentas/register.html', {'form': form})
 
 
 @login_required
 def profile_view(request):
-    return render(request, 'cuentas/profile.html')
+    orders = Order.objects.filter(user=request.user).order_by('-created')[:10]
+    return render(request, 'cuentas/profile.html', {
+        'orders': orders,
+        'profile': request.user.profile,
+    })
 
 
 @login_required
 def edit_profile_view(request):
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = UserProfileForm(request.POST, instance=request.user.profile)
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Perfil actualizado exitosamente.')
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = UserProfileForm(request.POST, instance=request.user.profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Perfil actualizado!')
             return redirect('cuentas:profile')
     else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = UserProfileForm(instance=request.user.profile)
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = UserProfileForm(instance=request.user.profile)
+
     return render(request, 'cuentas/edit_profile.html', {
-        'user_form': user_form,
-        'profile_form': profile_form,
+        'u_form': u_form,
+        'p_form': p_form,
     })
+
+
+@login_required
+def order_tracking_view(request, order_id):
+    order = Order.objects.filter(order_id=order_id, user=request.user).first()
+    if not order:
+        messages.error(request, 'Pedido no encontrado')
+        return redirect('cuentas:profile')
+    return render(request, 'cuentas/order_tracking.html', {'order': order})

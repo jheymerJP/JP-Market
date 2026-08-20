@@ -6,12 +6,14 @@ from carrito.models import Order
 
 class Pago(models.Model):
     METODOS = (
-        ('credit_card', 'Tarjeta de Credito'),
-        ('debit_card', 'Tarjeta de Debito'),
-        ('pse', 'PSE - Transferencia Bancaria'),
-        ('nequi', 'Nequi'),
-        ('daviplata', 'Daviplata'),
-        ('efectivo', 'Efectivo contra entrega'),
+        ('yape', 'Yape'),
+        ('plin', 'Plin'),
+        ('pago_efectivo', 'PagoEfectivo'),
+        ('tarjeta_credito', 'Tarjeta de Credito'),
+        ('tarjeta_debito', 'Tarjeta de Debito'),
+        ('transferencia', 'Transferencia Bancaria'),
+        ('cuallki', 'Cuallki'),
+        ('efectivo', 'Efectivo'),
     )
     ESTADOS = (
         ('pending', 'Pendiente'),
@@ -32,7 +34,7 @@ class Pago(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        return f"{self.order_id} - {self.get_metodo_pago_display()} - ${self.monto}"
+        return f"{self.order_id} - {self.get_metodo_pago_display()} - S/.{self.monto}"
 
 
 class Boleta(models.Model):
@@ -47,9 +49,9 @@ class Boleta(models.Model):
     cliente_email = models.EmailField()
     cliente_direccion = models.CharField(max_length=500)
     cliente_ciudad = models.CharField(max_length=200)
-    cliente_documento = models.CharField(max_length=30, blank=True)
+    cliente_documento = models.CharField(max_length=8, help_text="DNI - 8 digitos")
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
-    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    igv = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     descuento = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     metodo_pago = models.CharField(max_length=30)
@@ -59,6 +61,7 @@ class Boleta(models.Model):
 
     class Meta:
         ordering = ['-created']
+        verbose_name_plural = 'Boletas'
 
     def __str__(self):
         return f"Boleta {self.numero}"
@@ -67,7 +70,7 @@ class Boleta(models.Model):
         if not self.numero:
             last = Boleta.objects.order_by('-id').first()
             num = (last.id + 1) if last else 1
-            self.numero = f"BOL-{num:06d}"
+            self.numero = f"B001-{num:06d}"
         super().save(*args, **kwargs)
 
 
@@ -83,9 +86,9 @@ class Factura(models.Model):
     cliente_email = models.EmailField()
     cliente_direccion = models.CharField(max_length=500)
     cliente_ciudad = models.CharField(max_length=200)
-    cliente_nit = models.CharField(max_length=30)
+    cliente_nit = models.CharField(max_length=11, help_text="RUC - 11 digitos")
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
-    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    igv = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     descuento = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     metodo_pago = models.CharField(max_length=30)
@@ -95,6 +98,7 @@ class Factura(models.Model):
 
     class Meta:
         ordering = ['-created']
+        verbose_name_plural = 'Facturas'
 
     def __str__(self):
         return f"Factura {self.numero}"
@@ -103,7 +107,7 @@ class Factura(models.Model):
         if not self.numero:
             last = Factura.objects.order_by('-id').first()
             num = (last.id + 1) if last else 1
-            self.numero = f"FAC-{num:06d}"
+            self.numero = f"F001-{num:06d}"
         super().save(*args, **kwargs)
 
 
@@ -138,7 +142,7 @@ class Review(models.Model):
         unique_together = ('user', 'product')
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name} ({self.rating}*.)"
+        return f"{self.user.username} - {self.product.name} ({self.rating}*)"
 
 
 class Notificacion(models.Model):

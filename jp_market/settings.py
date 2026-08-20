@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-po=@y)nnf^_)tf3a=yyr^o0vh120y6*#jse1%e737v9$28th4_
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -78,7 +78,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'es'
-TIME_ZONE = 'America/Bogota'
+TIME_ZONE = 'America/Lima'
 USE_I18N = True
 USE_TZ = True
 
@@ -109,7 +109,16 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': '',
+        },
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
+
+IIVA_RATE = 0.18
+MONEDA = 'S/'
+MONEDA_SYMBOL = 'S/.'

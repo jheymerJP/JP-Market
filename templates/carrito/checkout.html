@@ -1,209 +1,267 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load static humanize %}
 {% block title %}Pago - JP Market{% endblock %}
-
+{% block extra_css %}
+<style>
+.checkout-section{padding:2rem 0;min-height:60vh}
+.checkout-container{max-width:1100px;margin:0 auto;padding:0 1rem}
+.checkout-header{text-align:center;margin-bottom:2rem}
+.checkout-header h1{font-family:'Playfair Display',serif;color:#1a1a2e}
+.checkout-grid{display:grid;grid-template-columns:2fr 1fr;gap:2rem;align-items:start}
+.checkout-form{background:#fff;border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.05)}
+.form-section-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a1a2e;margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:2px solid #f0f0f0;display:flex;align-items:center;gap:.5rem}
+.form-section-title i{color:#6c63ff}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:600;color:#1a1a2e;margin-bottom:.4rem;font-size:.9rem}
+.form-input,.form-select{width:100%;padding:.85rem 1rem;border:2px solid #e8e8e8;border-radius:10px;font-size:.95rem;transition:border-color .2s;background:#fafafa}
+.form-input:focus,.form-select:focus{border-color:#6c63ff;background:#fff;outline:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.payment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin:1rem 0}
+.payment-option{position:relative}
+.payment-option input[type="radio"]{position:absolute;opacity:0;width:0;height:0}
+.payment-option label{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem;border:2px solid #e8e8e8;border-radius:12px;cursor:pointer;transition:all .2s;text-align:center;background:#fafafa}
+.payment-option label:hover{border-color:#6c63ff;background:#f5f5ff}
+.payment-option input:checked + label{border-color:#6c63ff;background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(233,30,99,.05))}
+.payment-option label i{font-size:1.5rem;color:#6c63ff}
+.payment-option label span{font-size:.8rem;font-weight:600;color:#1a1a2e}
+.comprobante-toggle{display:flex;gap:1rem;margin:1rem 0}
+.comprobante-toggle label{flex:1;padding:1.25rem;border:2px solid #e8e8e8;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s}
+.comprobante-toggle label:hover{border-color:#6c63ff}
+.comprobante-toggle input:checked + label{border-color:#6c63ff;background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(233,30,99,.05))}
+.comprobante-toggle label i{font-size:2rem;display:block;margin-bottom:.5rem;color:#6c63ff}
+.comprobante-toggle label strong{display:block;color:#1a1a2e}
+.comprobante-toggle label small{color:#666;font-size:.8rem}
+.comprobante-fields{display:none;padding:1rem;background:#f9f9f9;border-radius:12px;margin-top:1rem}
+.comprobante-fields.active{display:block}
+.checkout-summary{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:sticky;top:100px}
+.checkout-summary h2{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:1rem}
+.summary-item{display:flex;gap:.75rem;padding:.75rem 0;border-bottom:1px solid #f5f5f5}
+.summary-item-img{width:50px;height:50px;border-radius:8px;background:#f5f6fa;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.summary-item-img img{width:100%;height:100%;object-fit:cover}
+.summary-item-img .no-img{font-size:1rem;color:#ddd}
+.summary-item-info{flex:1}
+.summary-item-info .item-name{font-size:.85rem;font-weight:600;color:#1a1a2e}
+.summary-item-info .item-qty{font-size:.8rem;color:#999}
+.summary-item-info .item-price{font-size:.9rem;font-weight:600;color:#6c63ff}
+.summary-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f0f0f0}
+.summary-row.total{border-top:2px solid #1a1a2e;border-bottom:none;padding-top:1rem;margin-top:.5rem;font-size:1.3rem;font-weight:700}
+.btn-pay{width:100%;padding:1.1rem;border:none;border-radius:12px;background:linear-gradient(135deg,#6c63ff,#e91e63);color:#fff;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .3s;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.btn-pay:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,.4)}
+.secure-notice{text-align:center;margin-top:1rem;padding:1rem;background:#f0fff4;border-radius:12px;border:1px solid #c8e6c9}
+.secure-notice i{color:#4caf50;margin-right:.5rem}
+.secure-notice span{font-size:.85rem;color:#2e7d32}
+@media(max-width:768px){.checkout-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.payment-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+{% endblock %}
 {% block content %}
-<div class="breadcrumb">
-    <a href="{% url 'tienda:home' %}">Inicio</a> /
-    <a href="{% url 'carrito:cart_detail' %}">Carrito</a> /
-    <span>Pago</span>
-</div>
+<section class="checkout-section">
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h1><i class="fas fa-credit-card"></i> Finalizar Compra</h1>
+        </div>
 
-<h1 class="page-title">Finalizar Compra</h1>
-
-<div class="checkout-layout">
-    <div class="checkout-form-container">
-        <form method="POST" class="checkout-form">
-            {% csrf_token %}
-            <div class="form-section">
-                <h3><i class="fas fa-user"></i> Datos Personales</h3>
-                <div class="form-group">
-                    <label for="full_name">Nombre Completo *</label>
-                    <input type="text" name="full_name" id="full_name" class="form-control" required
-                           value="{{ user.get_full_name|default:'' }}" placeholder="Juan Perez">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" name="email" id="email" class="form-control" required
-                           value="{{ user.email|default:'' }}" placeholder="tu@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="phone">Telefono *</label>
-                    <input type="tel" name="phone" id="phone" class="form-control" required
-                           value="{{ user.profile.phone|default:'' }}" placeholder="+57 300 123 4567">
-                </div>
-                <div class="form-group">
-                    <label for="cedula">Cedula / NIT</label>
-                    <input type="text" name="cedula" id="cedula" class="form-control"
-                           placeholder="1234567890">
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3><i class="fas fa-location-dot"></i> Direccion de Envio</h3>
-                <div class="form-group">
-                    <label for="address">Direccion Completa *</label>
-                    <input type="text" name="address" id="address" class="form-control" required
-                           value="{{ user.profile.address|default:'' }}" placeholder="Calle 123 #45-67, Apto 101">
-                </div>
-                <div class="form-group">
-                    <label for="city">Ciudad *</label>
-                    <input type="text" name="city" id="city" class="form-control" required
-                           value="{{ user.profile.city|default:'' }}" placeholder="Bogota">
-                </div>
-                <div class="form-group">
-                    <label for="barrio">Barrio</label>
-                    <input type="text" name="barrio" id="barrio" class="form-control"
-                           placeholder="Chapinero">
-                </div>
-                <div class="form-group">
-                    <label for="notas">Notas de entrega</label>
-                    <input type="text" name="notas" id="notas" class="form-control"
-                           placeholder="Ej: Entregar despues de las 6pm">
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3><i class="fas fa-credit-card"></i> Metodo de Pago</h3>
-                <p style="color: var(--dark-soft); font-size: 0.88rem; margin-bottom: 18px;">
-                    <i class="fas fa-lock"></i> Todos los pagos son 100% seguros y encriptados
-                </p>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="credit_card" checked style="accent-color: var(--primary);">
-                        <i class="fas fa-credit-card" style="color: var(--primary); font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">Tarjeta de Credito</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">Visa, Mastercard, AMEX</p>
-                        </div>
-                    </label>
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="debit_card" style="accent-color: var(--primary);">
-                        <i class="fas fa-money-check" style="color: var(--success); font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">Tarjeta de Debito</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">PSE, Daviplata</p>
-                        </div>
-                    </label>
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="pse" style="accent-color: var(--primary);">
-                        <i class="fas fa-university" style="color: var(--info); font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">PSE</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">Transferencia bancaria</p>
-                        </div>
-                    </label>
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="nequi" style="accent-color: var(--primary);">
-                        <i class="fas fa-mobile-alt" style="color: #00c4cc; font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">Nequi</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">Pago movil</p>
-                        </div>
-                    </label>
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="daviplata" style="accent-color: var(--primary);">
-                        <i class="fas fa-mobile-alt" style="color: #ff6b35; font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">Daviplata</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">Pago movil</p>
-                        </div>
-                    </label>
-                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
-                        <input type="radio" name="metodo_pago" value="efectivo" style="accent-color: var(--primary);">
-                        <i class="fas fa-money-bill-wave" style="color: var(--secondary); font-size: 1.2rem;"></i>
-                        <div>
-                            <strong style="font-size: 0.88rem;">Efectivo</strong>
-                            <p style="font-size: 0.75rem; color: var(--gray);">Contra entrega</p>
-                        </div>
-                    </label>
-                </div>
-
-                <div id="cardFields" style="padding: 20px; background: var(--light); border-radius: var(--radius); margin-bottom: 15px;">
-                    <div class="form-group">
-                        <label>Numero de Tarjeta</label>
-                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div class="form-group">
-                            <label>Vencimiento</label>
-                            <input type="text" class="form-control" placeholder="MM/AA" maxlength="5">
-                        </div>
-                        <div class="form-group">
-                            <label>CVV</label>
-                            <input type="text" class="form-control" placeholder="123" maxlength="4">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre en la Tarjeta</label>
-                        <input type="text" class="form-control" placeholder="JUAN PEREZ">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <img src="https://img.icons8.com/color/40/visa.png" alt="Visa" style="height: 28px;">
-                    <img src="https://img.icons8.com/color/40/mastercard.png" alt="Mastercard" style="height: 28px;">
-                    <img src="https://img.icons8.com/color/40/amex.png" alt="AMEX" style="height: 28px;">
-                    <img src="https://img.icons8.com/color/40/pse.png" alt="PSE" style="height: 28px;">
-                    <img src="https://img.icons8.com/color/40/nequi.png" alt="Nequi" style="height: 28px;">
-                </div>
-
-                <div style="padding: 14px; background: rgba(0, 184, 148, 0.05); border: 1px solid rgba(0, 184, 148, 0.2); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--success);">
-                    <i class="fas fa-shield-halved"></i> <strong>Pago seguro:</strong> Tus datos estan protegidos con encriptacion SSL de 256 bits. No almacenamos datos de tarjeta.
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3><i class="fas fa-ticket"></i> Codigo de Descuento</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="cupon" class="form-control" placeholder="Ingresa tu codigo" style="flex: 1;">
-                    <button type="button" class="btn btn-outline" onclick="alert('Codigo de descuento aplicado!')">
-                        <i class="fas fa-check"></i> Aplicar
-                    </button>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg btn-block">
-                <i class="fas fa-lock"></i> Confirmar Pedido - ${{ cart.total|intcomma }}
-            </button>
-        </form>
-    </div>
-
-    <div class="checkout-summary">
-        <h3><i class="fas fa-clipboard-list"></i> Tu Pedido</h3>
-        <div class="checkout-items">
-            {% for item in items %}
-            <div class="checkout-item">
-                <div>
-                    <span style="font-weight: 600;">{{ item.product.name|truncatechars:22 }}</span>
-                    <span style="color: var(--gray); font-size: 0.82rem;"> x{{ item.quantity }}</span>
-                </div>
-                <span style="font-weight: 700;">${{ item.subtotal|intcomma }}</span>
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" onclick="this.remove()">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                {{ message }}
             </div>
             {% endfor %}
         </div>
-        <div class="summary-row">
-            <span>Subtotal</span>
-            <span>${{ cart.total|intcomma }}</span>
-        </div>
-        <div class="summary-row">
-            <span>Envio</span>
-            <span class="text-success"><i class="fas fa-check-circle"></i> Gratis</span>
-        </div>
-        <div class="summary-row">
-            <span>Impuestos</span>
-            <span>Incluidos</span>
-        </div>
-        <div class="summary-total">
-            <span>Total a Pagar</span>
-            <span>${{ cart.total|intcomma }}</span>
-        </div>
+        {% endif %}
 
-        <div style="padding: 14px; background: var(--light); border-radius: var(--radius); margin-top: 15px; font-size: 0.82rem; color: var(--dark-soft);">
-            <p><i class="fas fa-truck"></i> Envio estimado: 24-48 horas</p>
-            <p style="margin-top: 6px;"><i class="fas fa-rotate-left"></i> Garantia de devolucion: 30 dias</p>
-        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="checkout-grid">
+                <div class="checkout-form">
+                    <h3 class="form-section-title"><i class="fas fa-user"></i> Datos Personales</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre Completo *</label>
+                            <input type="text" name="full_name" class="form-input" value="{{ user.get_full_name }}" placeholder="Juan Perez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electronico *</label>
+                            <input type="email" name="email" class="form-input" value="{{ user.email }}" placeholder="juan@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefono *</label>
+                            <input type="tel" name="phone" class="form-input" value="{{ profile.telefono|default:'' }}" placeholder="999 888 777" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Distrito</label>
+                            <select name="distrito" class="form-select">
+                                <option value="">Seleccionar distrito</option>
+                                <option>Ancón</option><option>Ate</option><option>Barranco</option><option>Breña</option>
+                                <option>Carabayllo</option><option>Chaclacayo</option><option>Chorrillos</option>
+                                <option>Cieneguilla</option><option>Comas</option><option>Condevilla</option>
+                                <option>El Agustino</option><option>Independencia</option><option>Jesús María</option>
+                                <option>Juliani</option><option>La Molina</option><option>La Victoria</option>
+                                <option>Lince</option><option>Los Olivos</option><option>Lurigancho</option>
+                                <option>Lurin</option><option>Magdalena del Mar</option><option>Miraflores</option>
+                                <option>Pachacamac</option><option>Pucusana</option><option>Pueblo Libre</option>
+                                <option>Penalolén</option><option>Puente Piedra</option><option>Punta Hermosa</option>
+                                <option>Punta Negra</option><option>Rímac</option><option>San Bartolo</option>
+                                <option>San Borja</option><option>San Isidro</option><option>San Juan de Lurigancho</option>
+                                <option>San Juan de Miraflores</option><option>San Luis</option><option>San Martin de Porres</option>
+                                <option>San Miguel</option><option>Santa Anita</option><option>Santa María del Mar</option>
+                                <option>Santa Rosa</option><option>Santiago de Surco</option><option>Surquillo</option>
+                                <option>Villa El Salvador</option><option>Villa María del Triunfo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Direccion de Entrega *</label>
+                        <input type="text" name="address" class="form-input" value="{{ profile.direccion|default:'' }}" placeholder="Av. La Marina 123, Urb. Los Olivos" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ciudad *</label>
+                        <input type="text" name="city" class="form-input" value="Lima" required>
+                    </div>
+
+                    <h3 class="form-section-title"><i class="fas fa-file-invoice"></i> Comprobante de Pago</h3>
+                    <div class="comprobante-toggle">
+                        <input type="radio" name="tipo_comprobante" id="boleta" value="boleta" checked onchange="toggleComprobante()">
+                        <label for="boleta">
+                            <i class="fas fa-receipt"></i>
+                            <strong>Boleta de Venta</strong>
+                            <small>Persona natural - DNI (8 digitos)</small>
+                        </label>
+                        <input type="radio" name="tipo_comprobante" id="factura" value="factura" onchange="toggleComprobante()">
+                        <label for="factura">
+                            <i class="fas fa-file-invoice"></i>
+                            <strong>Factura</strong>
+                            <small>Empresa - RUC (11 digitos)</small>
+                        </label>
+                    </div>
+
+                    <div class="comprobante-fields active" id="fields-boleta">
+                        <div class="form-group">
+                            <label><i class="fas fa-id-card"></i> Numero de DNI *</label>
+                            <input type="text" name="numero_documento" id="num-doc-boleta" class="form-input" placeholder="12345678" maxlength="8" pattern="[0-9]{8}" required>
+                            <small style="color:#666;font-size:.8rem">Ingresa tu DNI de 8 digitos</small>
+                        </div>
+                    </div>
+
+                    <div class="comprobante-fields" id="fields-factura">
+                        <div class="form-group">
+                            <label><i class="fas fa-building"></i> Numero de RUC *</label>
+                            <input type="text" name="numero_documento" id="num-doc-factura" class="form-input" placeholder="20123456789" maxlength="11" pattern="[0-9]{11}">
+                            <small style="color:#666;font-size:.8rem">RUC de la empresa (11 digitos)</small>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-building"></i> Razon Social *</label>
+                            <input type="text" name="razon_social" id="razon-social" class="form-input" placeholder="Empresa SAC">
+                            <small style="color:#666;font-size:.8rem">Nombre legal de la empresa</small>
+                        </div>
+                    </div>
+
+                    <h3 class="form-section-title"><i class="fas fa-credit-card"></i> Metodo de Pago</h3>
+                    <div class="payment-grid">
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="yape" value="yape" checked>
+                            <label for="yape"><i class="fas fa-mobile-alt"></i><span>Yape</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="plin" value="plin">
+                            <label for="plin"><i class="fas fa-mobile-alt"></i><span>Plin</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="pago_efectivo" value="pago_efectivo">
+                            <label for="pago_efectivo"><i class="fas fa-store"></i><span>PagoEfectivo</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="tarjeta_credito" value="tarjeta_credito">
+                            <label for="tarjeta_credito"><i class="fas fa-credit-card"></i><span>Tarjeta Credito</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="tarjeta_debito" value="tarjeta_debito">
+                            <label for="tarjeta_debito"><i class="fas fa-credit-card"></i><span>Tarjeta Debito</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="transferencia" value="transferencia">
+                            <label for="transferencia"><i class="fas fa-university"></i><span>Transferencia</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="cuallki" value="cuallki">
+                            <label for="cuallki"><i class="fas fa-wallet"></i><span>Cuallki</span></label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="metodo_pago" id="efectivo" value="efectivo">
+                            <label for="efectivo"><i class="fas fa-money-bill-wave"></i><span>Efectivo</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Notas de Entrega (opcional)</label>
+                        <textarea name="notas" class="form-input" rows="3" placeholder="Ej: Llamar al interfono, dejar en porteria, timbre 3B..."></textarea>
+                    </div>
+                </div>
+
+                <div class="checkout-summary">
+                    <h2><i class="fas fa-receipt"></i> Tu Pedido</h2>
+                    {% for item in items %}
+                    <div class="summary-item">
+                        <div class="summary-item-img">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <span class="no-img"><i class="fas fa-image"></i></span>
+                            {% endif %}
+                        </div>
+                        <div class="summary-item-info">
+                            <div class="item-name">{{ item.product.name }}</div>
+                            <div class="item-qty">x{{ item.quantity }}</div>
+                            <div class="item-price">S/.{{ item.subtotal|intcomma }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>S/.{{ subtotal|intcomma }}</span>
+                    </div>
+                    {% if descuento > 0 %}
+                    <div class="summary-row" style="color:#4caf50">
+                        <span>Descuento</span>
+                        <span>-S/.{{ descuento|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="summary-row">
+                        <span>Envio</span>
+                        <span style="color:#4caf50">{% if subtotal >= 50 %}Gratis{% else %}S/.5.00{% endif %}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>S/.{{ total|intcomma }}</span>
+                    </div>
+
+                    <button type="submit" class="btn-pay">
+                        <i class="fas fa-lock"></i> Pagar S/.{{ total|intcomma }}
+                    </button>
+                    <div class="secure-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Pago 100% seguro con encriptacion SSL</span>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-</div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+function toggleComprobante(){
+    const tipo=document.querySelector('input[name="tipo_comprobante"]:checked').value;
+    document.getElementById('fields-boleta').classList.toggle('active',tipo==='boleta');
+    document.getElementById('fields-factura').classList.toggle('active',tipo==='factura');
+    const numDoc=document.getElementById('num-doc-boleta');
+    const numDocF=document.getElementById('num-doc-factura');
+    if(tipo==='boleta'){numDoc.required=true;numDocF.required=false;document.getElementById('razon-social').required=false;}
+    else{numDoc.required=false;numDocF.required=true;document.getElementById('razon-social').required=true;}
+}
+</script>
 {% endblock %}

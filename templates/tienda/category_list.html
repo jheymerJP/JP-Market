@@ -1,27 +1,33 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Categorias - JP Market{% endblock %}
-
 {% block content %}
-<div class="breadcrumb">
-    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Categorias</span>
-</div>
-
-<h1 class="page-title">Nuestras Categorias</h1>
-
-<div class="categories-grid">
-    {% for category in categories %}
-    <a href="{{ category.get_absolute_url }}" class="category-card category-card-lg" data-animate>
-        {% if category.image %}
-            <img src="{{ category.image.url }}" alt="{{ category.name }}">
-        {% else %}
-            <div class="category-placeholder"><i class="fas fa-tag"></i></div>
-        {% endif %}
-        <div class="category-info">
-            <h3>{{ category.name }}</h3>
-            <p>{{ category.description|default:"Explora nuestra coleccion de productos" }}</p>
-            <span class="btn btn-outline">Ver Productos <i class="fas fa-arrow-right"></i></span>
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2><i class="fas fa-tags"></i> Categorias</h2>
+            <p>Explora todas nuestras categorias</p>
+            <div class="line"></div>
         </div>
-    </a>
-    {% endfor %}
-</div>
+        <div class="categories-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+            {% for cat in categories %}
+            <a href="{% url 'tienda:category_detail' cat.id %}" class="category-card">
+                <div class="cat-icon">
+                    {% if cat.name == 'Bebidas' %}<i class="fas fa-wine-bottle"></i>
+                    {% elif cat.name == 'Lacteos' %}<i class="fas fa-cheese"></i>
+                    {% elif cat.name == 'Panaderia' %}<i class="fas fa-bread-slice"></i>
+                    {% elif cat.name == 'Frutas y Verduras' %}<i class="fas fa-apple-alt"></i>
+                    {% elif cat.name == 'Limpieza' %}<i class="fas fa-spray-can"></i>
+                    {% elif cat.name == 'Carnes' %}<i class="fas fa-drumstick-bite"></i>
+                    {% elif cat.name == 'Snacks' %}<i class="fas fa-cookie-bite"></i>
+                    {% elif cat.name == 'Abarrotes' %}<i class="fas fa-box"></i>
+                    {% else %}<i class="fas fa-tag"></i>{% endif %}
+                </div>
+                <h3>{{ cat.name }}</h3>
+                <span>{{ cat.product_count }} productos</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %}

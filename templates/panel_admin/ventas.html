@@ -1,77 +1,62 @@
 {% extends 'panel_admin/base_admin.html' %}
 {% load humanize %}
-{% block title %}Ventas - Panel Admin{% endblock %}
-{% block topbar_title %}Gestion de Ventas{% endblock %}
-
+{% block title %}Ventas - JP Market Admin{% endblock %}
+{% block page_title %}Gestion de Ventas{% endblock %}
 {% block content %}
-<div class="filter-bar">
-    <form action="" method="GET" style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, email, pedido..." value="{{ busqueda }}">
-        <select name="estado" class="form-control" style="max-width: 200px;">
-            <option value="">Todos los estados</option>
-            <option value="pending" {% if estado_actual == 'pending' %}selected{% endif %}>Pendiente</option>
-            <option value="processing" {% if estado_actual == 'processing' %}selected{% endif %}>Procesando</option>
-            <option value="shipped" {% if estado_actual == 'shipped' %}selected{% endif %}>Enviado</option>
-            <option value="delivered" {% if estado_actual == 'delivered' %}selected{% endif %}>Entregado</option>
-            <option value="cancelled" {% if estado_actual == 'cancelled' %}selected{% endif %}>Cancelado</option>
-        </select>
-        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Buscar</button>
-        {% if busqueda or estado_actual %}<a href="{% url 'panel_admin:ventas' %}" class="btn btn-outline btn-sm"><i class="fas fa-times"></i></a>{% endif %}
+<div class="toolbar">
+    <form method="GET" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por # o cliente..." value="{{ q }}">
+        <button type="submit"><i class="fas fa-search"></i></button>
     </form>
+    <div class="filter-group">
+        <a href="{% url 'panel_admin:ventas' %}" class="filter-btn {% if not status %}active{% endif %}">Todos</a>
+        <a href="?status=pending" class="filter-btn {% if status == 'pending' %}active{% endif %}">Pendientes</a>
+        <a href="?status=confirmed" class="filter-btn {% if status == 'confirmed' %}active{% endif %}">Confirmados</a>
+        <a href="?status=shipping" class="filter-btn {% if status == 'shipping' %}active{% endif %}">Enviados</a>
+        <a href="?status=delivered" class="filter-btn {% if status == 'delivered' %}active{% endif %}">Entregados</a>
+    </div>
 </div>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>Pedido</th>
-            <th>Cliente</th>
-            <th>Email</th>
-            <th>Ciudad</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for pedido in pedidos %}
-        <tr>
-            <td><strong>#{{ pedido.order_id|truncatechars:8 }}</strong></td>
-            <td>{{ pedido.full_name }}</td>
-            <td>{{ pedido.email }}</td>
-            <td>{{ pedido.city }}</td>
-            <td><strong>${{ pedido.total|intcomma }}</strong></td>
-            <td><span class="badge-status badge-{{ pedido.status }}">{{ pedido.get_status_display }}</span></td>
-            <td>{{ pedido.created|date:"d/m/Y" }}</td>
-            <td>
-                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                    <a href="{% url 'panel_admin:pedido_detail' pedido.order_id %}" class="btn btn-primary btn-sm" title="Ver detalle">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <form method="POST" action="{% url 'panel_admin:generar_boleta' pedido.order_id %}" style="display: inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="metodo_pago" value="No especificado">
-                        <button type="submit" class="btn btn-success btn-sm" title="Generar Boleta">
-                            <i class="fas fa-file-invoice"></i>
-                        </button>
-                    </form>
-                    <form method="POST" action="{% url 'panel_admin:generar_factura' pedido.order_id %}" style="display: inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="nit" value="000000000">
-                        <input type="hidden" name="metodo_pago" value="No especificado">
-                        <button type="submit" class="btn btn-warning btn-sm" title="Generar Factura">
-                            <i class="fas fa-file-alt"></i>
-                        </button>
-                    </form>
-                </div>
-            </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="8" style="text-align: center; padding: 50px; color: var(--gray);">
-            <i class="fas fa-shopping-bag" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
-            No se encontraron pedidos
-        </td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="content-card">
+    <div class="card-body">
+        <table class="data-table">
+            <thead>
+                <tr><th># Pedido</th><th>Cliente</th><th>Comprobante</th><th>Documento</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                {% for o in orders %}
+                <tr>
+                    <td><strong>{{ o.order_id }}</strong></td>
+                    <td>{{ o.full_name }}</td>
+                    <td><span class="badge badge-{% if o.tipo_comprobante == 'factura' %}info{% else %}success{% endif %}">{{ o.get_tipo_comprobante_display }}</span></td>
+                    <td>{{ o.get_tipo_documento_display }}: {{ o.numero_documento }}</td>
+                    <td><strong>S/.{{ o.total|intcomma }}</strong></td>
+                    <td><span class="badge badge-{{ o.status }}">{{ o.get_status_display }}</span></td>
+                    <td>{{ o.created|date:"d/m/Y" }}</td>
+                    <td>
+                        <div class="action-btns">
+                            <form method="POST" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="cambiar_estado">
+                                <input type="hidden" name="order_id" value="{{ o.order_id }}">
+                                <select name="new_status" onchange="this.form.submit()" class="form-select-sm">
+                                    <option value="pending" {% if o.status == 'pending' %}selected{% endif %}>Pendiente</option>
+                                    <option value="confirmed" {% if o.status == 'confirmed' %}selected{% endif %}>Confirmado</option>
+                                    <option value="preparing" {% if o.status == 'preparing' %}selected{% endif %}>Preparando</option>
+                                    <option value="shipping" {% if o.status == 'shipping' %}selected{% endif %}>Enviado</option>
+                                    <option value="delivering" {% if o.status == 'delivering' %}selected{% endif %}>En reparto</option>
+                                    <option value="delivered" {% if o.status == 'delivered' %}selected{% endif %}>Entregado</option>
+                                    <option value="cancelled" {% if o.status == 'cancelled' %}selected{% endif %}>Cancelado</option>
+                                </select>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:2rem;color:#999">No hay ventas registradas</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

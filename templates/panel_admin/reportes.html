@@ -1,141 +1,133 @@
 {% extends 'panel_admin/base_admin.html' %}
 {% load humanize %}
-{% block title %}Reportes - Panel Admin{% endblock %}
-{% block topbar_title %}Reportes del Sistema{% endblock %}
-
+{% block title %}Reportes - JP Market Admin{% endblock %}
+{% block page_title %}Reportes y Estadisticas{% endblock %}
 {% block content %}
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon purple"><i class="fas fa-dollar-sign"></i></div>
+    <div class="stat-card stat-primary">
+        <div class="stat-icon"><i class="fas fa-sol-sign"></i></div>
         <div class="stat-info">
-            <h3>${{ ventas_hoy|intcomma }}</h3>
-            <p>Ventas Hoy</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
-        <div class="stat-info">
-            <h3>${{ ventas_mes|intcomma }}</h3>
+            <h3>S/.{{ ventas_mes|intcomma }}</h3>
             <p>Ventas del Mes</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-calendar-alt"></i></div>
+    <div class="stat-card stat-success">
+        <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
         <div class="stat-info">
-            <h3>${{ ventas_año|intcomma }}</h3>
-            <p>Ventas del Ano</p>
+            <h3>{{ pedidos_mes }}</h3>
+            <p>Pedidos</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-receipt"></i></div>
+    <div class="stat-card stat-danger">
+        <div class="stat-icon"><i class="fas fa-receipt"></i></div>
         <div class="stat-info">
-            <h3>${{ ticket_promedio|intcomma }}</h3>
+            <h3>S/.{{ ticket_promedio|intcomma }}</h3>
             <p>Ticket Promedio</p>
         </div>
     </div>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon teal"><i class="fas fa-shopping-cart"></i></div>
+    <div class="stat-card stat-warning">
+        <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
         <div class="stat-info">
-            <h3>{{ pedidos_mes }}</h3>
-            <p>Pedidos este Mes</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon red"><i class="fas fa-clock"></i></div>
-        <div class="stat-info">
-            <h3>{{ pedidos_pendientes }}</h3>
-            <p>Pedidos Pendientes</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-user-plus"></i></div>
-        <div class="stat-info">
-            <h3>{{ clientes_nuevos_mes }}</h3>
-            <p>Nuevos Clientes (Mes)</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-users"></i></div>
-        <div class="stat-info">
-            <h3>{{ clientes_total }}</h3>
-            <p>Total Clientes</p>
+            <h3>S/.{{ ventas_hoy|intcomma }}</h3>
+            <p>Ventas Hoy</p>
         </div>
     </div>
 </div>
 
-<div class="dashboard-grid">
-    <div class="panel-card">
-        <h3><i class="fas fa-box"></i> Estado del Inventario</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 20px; background: rgba(108, 92, 231, 0.05); border-radius: var(--radius-sm);">
-                <h3 style="color: var(--primary);">{{ productos_total }}</h3>
-                <p style="font-size: 0.82rem; color: var(--gray);">Total Productos</p>
-            </div>
-            <div style="text-align: center; padding: 20px; background: rgba(253, 203, 110, 0.1); border-radius: var(--radius-sm);">
-                <h3 style="color: #e17055;">{{ productos_stock_bajo }}</h3>
-                <p style="font-size: 0.82rem; color: var(--gray);">Stock Bajo</p>
-            </div>
-            <div style="text-align: center; padding: 20px; background: rgba(255, 118, 117, 0.08); border-radius: var(--radius-sm);">
-                <h3 style="color: var(--danger);">{{ productos_agotados }}</h3>
-                <p style="font-size: 0.82rem; color: var(--gray);">Agotados</p>
-            </div>
+<div class="content-grid">
+    <div class="content-card">
+        <div class="card-header"><h3><i class="fas fa-fire"></i> Top 10 Productos Vendidos</h3></div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Producto</th><th>Cantidad</th><th>Total Vendido</th></tr></thead>
+                <tbody>
+                    {% for p in top_products %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ p.product__name }}</strong></td>
+                        <td><span class="badge badge-info">{{ p.cantidad }} u.</span></td>
+                        <td>S/.{{ p.total_vendido|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-        <h3 style="margin-top: 25px;"><i class="fas fa-trophy"></i> Top 10 Productos Vendidos</h3>
-        {% for p in top_productos %}
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--light);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700;">{{ forloop.counter }}</span>
-                <div>
-                    <strong>{{ p.name|truncatechars:30 }}</strong>
-                    <p style="font-size: 0.78rem; color: var(--gray);">{{ p.category.name }}</p>
-                </div>
-            </div>
-            <span style="font-weight: 700; color: var(--primary);">{{ p.vendidos }} vendidos</span>
-        </div>
-        {% endfor %}
     </div>
 
-    <div>
-        <div class="panel-card">
-            <h3><i class="fas fa-chart-pie"></i> Ventas por Metodo de Pago</h3>
-            {% for metodo in pagos_por_metodo %}
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--light);">
-                <div>
-                    <strong>{{ metodo.metodo_pago }}</strong>
-                    <p style="font-size: 0.78rem; color: var(--gray);">{{ metodo.cantidad }} transacciones</p>
-                </div>
-                <span style="font-weight: 700; color: var(--success);">${{ metodo.total|intcomma }}</span>
-            </div>
-            {% empty %}
-            <p style="text-align: center; color: var(--gray); padding: 20px;">Sin datos de pagos</p>
-            {% endfor %}
+    <div class="content-card">
+        <div class="card-header"><h3><i class="fas fa-credit-card"></i> Metodos de Pago</h3></div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead><tr><th>Metodo</th><th>Cantidad</th><th>Total</th></tr></thead>
+                <tbody>
+                    {% for m in metodos_pago %}
+                    <tr>
+                        <td><strong>{{ m.metodo_pago }}</strong></td>
+                        <td>{{ m.cantidad }}</td>
+                        <td>S/.{{ m.total|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" style="text-align:center;color:#999">Sin datos</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
+</div>
 
-        <div class="panel-card">
-            <h3><i class="fas fa-city"></i> Top Ciudades</h3>
-            {% for ciudad in top_ciudades %}
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--light);">
-                <span>{{ ciudad.city }}</span>
-                <span style="font-weight: 700;">{{ ciudad.total }} pedidos</span>
-            </div>
-            {% empty %}
-            <p style="text-align: center; color: var(--gray); padding: 20px;">Sin datos</p>
-            {% endfor %}
+<div class="content-grid">
+    <div class="content-card">
+        <div class="card-header"><h3><i class="fas fa-map-marker-alt"></i> Top Ciudades</h3></div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead><tr><th>Ciudad/Distrito</th><th>Pedidos</th><th>Total</th></tr></thead>
+                <tbody>
+                    {% for c in cities_stats %}
+                    <tr>
+                        <td>{{ c.city }}</td>
+                        <td>{{ c.cantidad }}</td>
+                        <td>S/.{{ c.total|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" style="text-align:center;color:#999">Sin datos</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <div class="panel-card">
-            <h3><i class="fas fa-chart-bar"></i> Pedidos por Estado</h3>
-            {% for estado in pedidos_por_estado %}
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--light);">
-                <span class="badge-status badge-{{ estado.status }}">{{ estado.status }}</span>
-                <span style="font-weight: 700;">{{ estado.total }}</span>
-            </div>
-            {% endfor %}
+    <div class="content-card">
+        <div class="card-header"><h3><i class="fas fa-chart-pie"></i> Pedidos por Estado</h3></div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+                <tbody>
+                    {% for s in pedidos_por_status %}
+                    <tr>
+                        <td><span class="badge badge-{{ s.status }}">{{ s.status }}</span></td>
+                        <td>{{ s.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="card-header"><h3><i class="fas fa-tags"></i> Categorias</h3></div>
+    <div class="card-body">
+        <table class="data-table">
+            <thead><tr><th>Categoria</th><th>Productos</th></tr></thead>
+            <tbody>
+                {% for c in categorias %}
+                <tr>
+                    <td><strong>{{ c.name }}</strong></td>
+                    <td>{{ c.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

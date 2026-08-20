@@ -1,58 +1,70 @@
 {% extends 'base.html' %}
-{% load humanize %}
-{% block title %}Pedido Completado - JP Market{% endblock %}
-
+{% load static humanize %}
+{% block title %}Pedido Confirmado - JP Market{% endblock %}
+{% block extra_css %}
+<style>
+.complete-section{padding:3rem 0;min-height:60vh}
+.complete-container{max-width:700px;margin:0 auto;text-align:center}
+.complete-icon{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#4caf50,#2e7d32);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#fff;font-size:2.5rem;animation:scaleIn .5s ease}
+@keyframes scaleIn{from{transform:scale(0)}to{transform:scale(1)}}
+.complete-container h1{font-family:'Playfair Display',serif;color:#1a1a2e;margin-bottom:.5rem}
+.complete-container .order-id{font-size:1.2rem;color:#6c63ff;font-weight:600;margin-bottom:1rem}
+.complete-container p{color:#666;margin-bottom:2rem;line-height:1.6}
+.complete-card{background:#fff;border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:left;margin-bottom:2rem}
+.complete-card h3{font-family:'Playfair Display',serif;margin-bottom:1rem}
+.complete-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f5f5f5}
+.complete-row.total{border-top:2px solid #1a1a2e;border-bottom:none;font-size:1.2rem;font-weight:700;padding-top:1rem;margin-top:.5rem}
+.complete-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+</style>
+{% endblock %}
 {% block content %}
-<div class="order-success">
-    <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
-    </div>
-    <h1>¡Pedido Realizado!</h1>
-    <p>Tu pedido ha sido procesado exitosamente</p>
-    <span class="order-number">{{ order.order_id }}</span>
+<section class="complete-section">
+    <div class="complete-container">
+        <div class="complete-icon"><i class="fas fa-check"></i></div>
+        <h1>Pedido Confirmado!</h1>
+        <div class="order-id">Pedido #{{ order.order_id }}</div>
+        <p>Gracias por tu compra en JP Market. Recibirás un correo de confirmación en <strong>{{ order.email }}</strong>.</p>
 
-    <div class="order-details">
-        <h3>Detalles del Pedido</h3>
-        <div class="order-info-grid">
-            <div>
-                <strong><i class="fas fa-user"></i> Nombre</strong>
-                <p>{{ order.full_name }}</p>
-            </div>
-            <div>
-                <strong><i class="fas fa-envelope"></i> Email</strong>
-                <p>{{ order.email }}</p>
-            </div>
-            <div>
-                <strong><i class="fas fa-location-dot"></i> Direccion</strong>
-                <p>{{ order.address }}, {{ order.city }}</p>
-            </div>
-            <div>
-                <strong><i class="fas fa-phone"></i> Telefono</strong>
-                <p>{{ order.phone }}</p>
-            </div>
+        {% if boleta %}
+        <div class="complete-card">
+            <h3><i class="fas fa-receipt" style="color:#6c63ff"></i> Boleta {{ boleta.numero }}</h3>
+            <div class="complete-row"><span>Cliente</span><span>{{ boleta.cliente_nombre }}</span></div>
+            <div class="complete-row"><span>DNI</span><span>{{ boleta.cliente_documento }}</span></div>
+            <div class="complete-row"><span>Direccion</span><span>{{ boleta.cliente_direccion }}</span></div>
+            <div class="complete-row"><span>Subtotal</span><span>S/.{{ boleta.subtotal }}</span></div>
+            <div class="complete-row"><span>IGV (18%)</span><span>S/.{{ boleta.igv }}</span></div>
+            {% if boleta.descuento > 0 %}
+            <div class="complete-row" style="color:#4caf50"><span>Descuento</span><span>-S/.{{ boleta.descuento }}</span></div>
+            {% endif %}
+            <div class="complete-row"><span>Metodo de Pago</span><span>{{ boleta.get_metodo_pago_display }}</span></div>
+            <div class="complete-row total"><span>Total Pagado</span><span style="color:#6c63ff">S/.{{ boleta.total }}</span></div>
         </div>
+        {% endif %}
 
-        <div class="order-items">
-            {% for item in order.items.all %}
-            <div class="order-item">
-                <span>{{ item.quantity }}x {{ item.product.name }}</span>
-                <span>${{ item.subtotal|intcomma }}</span>
-            </div>
-            {% endfor %}
+        {% if factura %}
+        <div class="complete-card">
+            <h3><i class="fas fa-file-invoice" style="color:#e91e63"></i> Factura {{ factura.numero }}</h3>
+            <div class="complete-row"><span>Razon Social</span><span>{{ factura.cliente_nombre }}</span></div>
+            <div class="complete-row"><span>RUC</span><span>{{ factura.cliente_nit }}</span></div>
+            <div class="complete-row"><span>Direccion</span><span>{{ factura.cliente_direccion }}</span></div>
+            <div class="complete-row"><span>Subtotal</span><span>S/.{{ factura.subtotal }}</span></div>
+            <div class="complete-row"><span>IGV (18%)</span><span>S/.{{ factura.igv }}</span></div>
+            {% if factura.descuento > 0 %}
+            <div class="complete-row" style="color:#4caf50"><span>Descuento</span><span>-S/.{{ factura.descuento }}</span></div>
+            {% endif %}
+            <div class="complete-row"><span>Metodo de Pago</span><span>{{ factura.get_metodo_pago_display }}</span></div>
+            <div class="complete-row total"><span>Total Pagado</span><span style="color:#e91e63">S/.{{ factura.total }}</span></div>
         </div>
-        <div class="summary-total">
-            <span>Total Pagado</span>
-            <span>${{ order.total|intcomma }}</span>
+        {% endif %}
+
+        <div class="complete-actions">
+            <a href="{% url 'carrito:tracking' order.order_id %}" class="btn btn-primary">
+                <i class="fas fa-truck"></i> Rastrear Pedido
+            </a>
+            <a href="{% url 'tienda:product_list' %}" class="btn btn-outline">
+                <i class="fas fa-shopping-bag"></i> Seguir Comprando
+            </a>
         </div>
     </div>
-
-    <div class="order-actions">
-        <a href="{% url 'tienda:home' %}" class="btn btn-primary">
-            <i class="fas fa-home"></i> Volver al Inicio
-        </a>
-        <a href="{% url 'carrito:order_history' %}" class="btn btn-outline">
-            <i class="fas fa-box"></i> Mis Pedidos
-        </a>
-    </div>
-</div>
+</section>
 {% endblock %}

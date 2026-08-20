@@ -1,71 +1,61 @@
 {% extends 'base.html' %}
 {% block title %}Mi Perfil - JP Market{% endblock %}
-
 {% block content %}
-<div class="breadcrumb">
-    <a href="{% url 'tienda:home' %}">Inicio</a> / <span>Mi Perfil</span>
-</div>
-
-<div class="profile-container">
-    <div class="profile-sidebar">
-        <div class="profile-avatar">
-            <i class="fas fa-user"></i>
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-info">
+                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                <p><i class="fas fa-phone"></i> {{ profile.telefono|default:"Sin telefono" }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> {{ profile.direccion|default:"Sin direccion" }}, {{ profile.distrito|default:"" }} - {{ profile.ciudad|default:"Lima" }}</p>
+                <p><i class="fas fa-id-card"></i> {{ profile.get_documento_tipo_display }}: {{ profile.documento_numero|default:"Sin registrar" }}</p>
+            </div>
+            <a href="{% url 'cuentas:edit_profile' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar Perfil
+            </a>
         </div>
-        <h2>{{ user.username }}</h2>
-        <p>{{ user.email }}</p>
-        <div class="profile-nav">
-            <a href="{% url 'cuentas:profile' %}" class="profile-nav-link active">
-                <i class="fas fa-user-circle"></i> Mi Perfil
-            </a>
-            <a href="{% url 'cuentas:edit_profile' %}" class="profile-nav-link">
-                <i class="fas fa-pen"></i> Editar Perfil
-            </a>
-            <a href="{% url 'carrito:order_history' %}" class="profile-nav-link">
-                <i class="fas fa-box"></i> Mis Pedidos
-            </a>
-            {% if user.is_staff %}
-            <a href="{% url 'admin:index' %}" class="profile-nav-link">
-                <i class="fas fa-cog"></i> Administracion
-            </a>
+
+        <div class="profile-section-content">
+            <h2><i class="fas fa-box"></i> Mis Pedidos Recientes</h2>
+            {% if orders %}
+            <div class="orders-list">
+                {% for order in orders %}
+                <div class="order-card">
+                    <div class="order-header">
+                        <span class="order-id">#{{ order.order_id }}</span>
+                        <span class="order-date">{{ order.created|date:"d/m/Y H:i" }}</span>
+                        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                    </div>
+                    <div class="order-body">
+                        {% for item in order.items.all %}
+                        <div class="order-item">
+                            <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                            <span>S/.{{ item.subtotal }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="order-footer">
+                        <span class="order-total">Total: <strong>S/.{{ order.total }}</strong></span>
+                        <a href="{% url 'carrito:tracking' order.order_id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-truck"></i> Rastrear
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>No tienes pedidos aun</h3>
+                <p>Empieza a comprar en JP Market!</p>
+                <a href="{% url 'tienda:product_list' %}" class="btn btn-primary">Ver Productos</a>
+            </div>
             {% endif %}
         </div>
     </div>
-
-    <div class="profile-main">
-        <h2>Mi Informacion</h2>
-        <div class="profile-info-grid">
-            <div class="info-item">
-                <label><i class="fas fa-user"></i> Usuario</label>
-                <p>{{ user.username }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-envelope"></i> Email</label>
-                <p>{{ user.email }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-id-card"></i> Nombre</label>
-                <p>{{ user.first_name|default:"No especificado" }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-id-card"></i> Apellido</label>
-                <p>{{ user.last_name|default:"No especificado" }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-phone"></i> Telefono</label>
-                <p>{{ user.profile.phone|default:"No especificado" }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-location-dot"></i> Direccion</label>
-                <p>{{ user.profile.address|default:"No especificado" }}</p>
-            </div>
-            <div class="info-item">
-                <label><i class="fas fa-city"></i> Ciudad</label>
-                <p>{{ user.profile.city|default:"No especificado" }}</p>
-            </div>
-        </div>
-        <a href="{% url 'cuentas:edit_profile' %}" class="btn btn-primary">
-            <i class="fas fa-pen"></i> Editar Perfil
-        </a>
-    </div>
-</div>
+</section>
 {% endblock %}
