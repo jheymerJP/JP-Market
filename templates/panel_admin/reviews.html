@@ -1,0 +1,46 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% block title %}Resenas - Panel Admin{% endblock %}
+{% block topbar_title %}Resenas de Clientes{% endblock %}
+
+{% block content %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Producto</th>
+            <th>Calificacion</th>
+            <th>Titulo</th>
+            <th>Comentario</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for review in reviews %}
+        <tr>
+            <td><strong>{{ review.user.username }}</strong></td>
+            <td>{{ review.product.name|truncatechars:25 }}</td>
+            <td>
+                {% for i in "12345" %}
+                    {% if forloop.counter <= review.rating %}
+                        <i class="fas fa-star" style="color: var(--secondary);"></i>
+                    {% else %}
+                        <i class="far fa-star" style="color: var(--gray);"></i>
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ review.titulo|truncatechars:30 }}</td>
+            <td>{{ review.comentario|truncatechars:50 }}</td>
+            <td>{{ review.created|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'panel_admin:review_delete' review.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Eliminar resena?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">No hay resenas</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

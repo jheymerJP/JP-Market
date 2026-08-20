@@ -7,6 +7,8 @@ from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
 
 def register_view(request):
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('panel_admin:dashboard')
         return redirect('tienda:home')
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -24,6 +26,8 @@ def register_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('panel_admin:dashboard')
         return redirect('tienda:home')
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -32,10 +36,14 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, f'Bienvenido de vuelta, {user.username}!')
-            next_url = request.GET.get('next', 'tienda:home')
-            return redirect(next_url)
+            if user.is_staff:
+                return redirect('panel_admin:dashboard')
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect('tienda:home')
         else:
-            messages.error(request, 'Usuario o contraseña incorrectos.')
+            messages.error(request, 'Usuario o contrasena incorrectos.')
     return render(request, 'cuentas/login.html')
 
 

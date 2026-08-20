@@ -1,0 +1,50 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% load humanize %}
+{% block title %}Facturas - Panel Admin{% endblock %}
+{% block topbar_title %}Gestion de Facturas{% endblock %}
+
+{% block content %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Numero</th>
+            <th>Cliente</th>
+            <th>NIT</th>
+            <th>Metodo Pago</th>
+            <th>Subtotal</th>
+            <th>IVA</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for factura in facturas %}
+        <tr>
+            <td><strong>{{ factura.numero }}</strong></td>
+            <td>{{ factura.cliente_nombre }}</td>
+            <td>{{ factura.cliente_nit }}</td>
+            <td>{{ factura.metodo_pago }}</td>
+            <td>${{ factura.subtotal|intcomma }}</td>
+            <td>${{ factura.iva|intcomma }}</td>
+            <td><strong>${{ factura.total|intcomma }}</strong></td>
+            <td><span class="badge-status badge-{{ factura.estado }}">{{ factura.get_estado_display }}</span></td>
+            <td>{{ factura.created|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'panel_admin:factura_detail' factura.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="10" style="text-align: center; padding: 50px; color: var(--gray);">
+                <i class="fas fa-file-alt" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                No hay facturas generadas
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

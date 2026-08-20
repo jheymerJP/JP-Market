@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel Admin - JP Market{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-shield-halved"></i>
+                <div>
+                    JP Market
+                    <span>Sistema de Gestion</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">Principal</div>
+            <a href="{% url 'panel_admin:dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+            </a>
+
+            <div class="sidebar-section">Gestion</div>
+            <a href="{% url 'panel_admin:ventas' %}" class="sidebar-link {% if 'ventas' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-shopping-bag"></i> <span>Ventas</span>
+            </a>
+            <a href="{% url 'panel_admin:productos' %}" class="sidebar-link {% if 'productos' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-box"></i> <span>Productos</span>
+            </a>
+            <a href="{% url 'panel_admin:clientes' %}" class="sidebar-link {% if 'clientes' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-users"></i> <span>Clientes</span>
+            </a>
+
+            <div class="sidebar-section">Facturacion</div>
+            <a href="{% url 'panel_admin:boletas' %}" class="sidebar-link {% if 'boleta' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-file-invoice"></i> <span>Boletas</span>
+            </a>
+            <a href="{% url 'panel_admin:facturas' %}" class="sidebar-link {% if 'factura' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-file-alt"></i> <span>Facturas</span>
+            </a>
+
+            <div class="sidebar-section">Marketing</div>
+            <a href="{% url 'panel_admin:cupones' %}" class="sidebar-link {% if 'cupon' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-ticket"></i> <span>Cupones</span>
+            </a>
+            <a href="{% url 'panel_admin:banners' %}" class="sidebar-link {% if 'banners' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-image"></i> <span>Banners</span>
+            </a>
+
+            <div class="sidebar-section">Reportes</div>
+            <a href="{% url 'panel_admin:reportes' %}" class="sidebar-link {% if 'reportes' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> <span>Reportes</span>
+            </a>
+
+            <div class="sidebar-section">Sistema</div>
+            <a href="{% url 'panel_admin:reviews' %}" class="sidebar-link {% if 'reviews' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-star"></i> <span>Resenas</span>
+            </a>
+            <a href="{% url 'panel_admin:config' %}" class="sidebar-link {% if 'config' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-cog"></i> <span>Configuracion</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'tienda:home' %}"><i class="fas fa-store"></i> Ver Tienda</a>
+            <a href="{% url 'cuentas:logout' %}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesion</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <h2 class="topbar-title">{% block topbar_title %}Dashboard{% endblock %}</h2>
+            <div class="topbar-right">
+                <a href="{% url 'tienda:home' %}" class="topbar-link"><i class="fas fa-store"></i> Ver Tienda</a>
+                <div class="topbar-user">
+                    <i class="fas fa-user-shield"></i>
+                    {{ user.username }}
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>

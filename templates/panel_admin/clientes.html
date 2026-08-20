@@ -1,0 +1,53 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% load humanize %}
+{% block title %}Clientes - Panel Admin{% endblock %}
+{% block topbar_title %}Gestion de Clientes{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+    <form action="" method="GET" style="display: flex; gap: 10px;">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, email, usuario..." value="{{ busqueda }}">
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
+        {% if busqueda %}<a href="{% url 'panel_admin:clientes' %}" class="btn btn-outline btn-sm"><i class="fas fa-times"></i></a>{% endif %}
+    </form>
+    <span style="color: var(--dark-soft); font-size: 0.9rem;">{{ clientes.count }} de {{ total_clientes }} clientes</span>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Nombre Completo</th>
+            <th>Email</th>
+            <th>Telefono</th>
+            <th>Ciudad</th>
+            <th>Registro</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}
+        <tr>
+            <td><strong>{{ cliente.username }}</strong></td>
+            <td>{{ cliente.get_full_name|default:"-" }}</td>
+            <td>{{ cliente.email }}</td>
+            <td>{{ cliente.profile.phone|default:"-" }}</td>
+            <td>{{ cliente.profile.city|default:"-" }}</td>
+            <td>{{ cliente.date_joined|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'panel_admin:cliente_detail' cliente.id %}" class="btn btn-primary btn-sm" title="Ver detalle">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align: center; padding: 50px; color: var(--gray);">
+                <i class="fas fa-users" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                No se encontraron clientes
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

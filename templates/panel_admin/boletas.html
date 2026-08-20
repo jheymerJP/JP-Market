@@ -1,0 +1,48 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% load humanize %}
+{% block title %}Boletas - Panel Admin{% endblock %}
+{% block topbar_title %}Gestion de Boletas{% endblock %}
+
+{% block content %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Numero</th>
+            <th>Cliente</th>
+            <th>Metodo Pago</th>
+            <th>Subtotal</th>
+            <th>IVA</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for boleta in boletas %}
+        <tr>
+            <td><strong>{{ boleta.numero }}</strong></td>
+            <td>{{ boleta.cliente_nombre }}</td>
+            <td>{{ boleta.metodo_pago }}</td>
+            <td>${{ boleta.subtotal|intcomma }}</td>
+            <td>${{ boleta.iva|intcomma }}</td>
+            <td><strong>${{ boleta.total|intcomma }}</strong></td>
+            <td><span class="badge-status badge-{{ boleta.estado }}">{{ boleta.get_estado_display }}</span></td>
+            <td>{{ boleta.created|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'panel_admin:boleta_detail' boleta.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" style="text-align: center; padding: 50px; color: var(--gray);">
+                <i class="fas fa-file-invoice" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                No hay boletas generadas
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% block title %}Banners - Panel Admin{% endblock %}
+{% block topbar_title %}Gestion de Banners{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="panel-card">
+        <h3><i class="fas fa-image"></i> Banners</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Titulo</th>
+                    <th>Orden</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for banner in banners %}
+                <tr>
+                    <td><strong>{{ banner.titulo }}</strong></td>
+                    <td>{{ banner.order }}</td>
+                    <td>
+                        {% if banner.activo %}
+                            <span class="badge-status badge-delivered">Activo</span>
+                        {% else %}
+                            <span class="badge-status badge-cancelled">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>-</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align: center; padding: 30px; color: var(--gray);">No hay banners</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-card">
+        <h3><i class="fas fa-plus"></i> Crear Banner</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-plus"></i> Crear Banner
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

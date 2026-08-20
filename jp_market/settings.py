@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'tienda',
     'carrito',
     'cuentas',
+    'panel_admin',
 ]
 
 MIDDLEWARE = [

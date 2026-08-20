@@ -1,0 +1,23 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% block title %}Editar Cupon - Panel Admin{% endblock %}
+{% block topbar_title %}Editar Cupon{% endblock %}
+
+{% block content %}
+<div class="panel-card" style="max-width: 500px;">
+    <h3><i class="fas fa-pen"></i> Editar Cupon: {{ cupon.codigo }}</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small style="color: var(--gray);">{{ field.help_text }}</small>{% endif %}
+        </div>
+        {% endfor %}
+        <div style="display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+            <a href="{% url 'panel_admin:cupones' %}" class="btn btn-outline"><i class="fas fa-times"></i> Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

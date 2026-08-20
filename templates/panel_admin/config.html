@@ -1,0 +1,71 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% block title %}Configuracion - Panel Admin{% endblock %}
+{% block topbar_title %}Configuracion del Sistema{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="panel-card">
+        <h3><i class="fas fa-store"></i> Datos de la Tienda</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Nombre de la Tienda</label>
+                <input type="text" class="form-control" value="JP Market">
+            </div>
+            <div class="form-group">
+                <label>Descripcion</label>
+                <input type="text" class="form-control" value="Tu tienda en linea de confianza">
+            </div>
+            <div class="form-group">
+                <label>Email de Contacto</label>
+                <input type="email" class="form-control" value="info@jpmarket.com">
+            </div>
+            <div class="form-group">
+                <label>Telefono</label>
+                <input type="tel" class="form-control" value="+57 300 123 4567">
+            </div>
+            <div class="form-group">
+                <label>Direccion</label>
+                <input type="text" class="form-control" value="Calle Principal #123, Bogota">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </form>
+    </div>
+
+    <div>
+        <div class="panel-card">
+            <h3><i class="fas fa-shield-halved"></i> Metodos de Pago</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--light); border-radius: var(--radius-sm);">
+                    <span><i class="fas fa-credit-card"></i> Tarjeta de Credito/Debito</span>
+                    <span class="badge-status badge-delivered">Activo</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--light); border-radius: var(--radius-sm);">
+                    <span><i class="fas fa-university"></i> PSE</span>
+                    <span class="badge-status badge-delivered">Activo</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--light); border-radius: var(--radius-sm);">
+                    <span><i class="fas fa-mobile-alt"></i> Nequi</span>
+                    <span class="badge-status badge-delivered">Activo</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--light); border-radius: var(--radius-sm);">
+                    <span><i class="fas fa-mobile-alt"></i> Daviplata</span>
+                    <span class="badge-status badge-delivered">Activo</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--light); border-radius: var(--radius-sm);">
+                    <span><i class="fas fa-money-bill-wave"></i> Efectivo</span>
+                    <span class="badge-status badge-delivered">Activo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <h3><i class="fas fa-chart-line"></i> Resumen Rapido</h3>
+            <p style="color: var(--dark-soft); font-size: 0.9rem;">Panel de administracion v1.0</p>
+            <p style="color: var(--dark-soft); font-size: 0.9rem;">Django 6.1 | SQLite</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

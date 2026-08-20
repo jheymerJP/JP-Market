@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Cart, CartItem, Order, OrderItem
 from tienda.models import Product
+import uuid
 
 
 def get_cart(request):
@@ -42,11 +43,11 @@ def remove_from_cart(request, item_id):
 def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
     quantity = int(request.POST.get('quantity', 1))
-    if quantity > 0 and quantity <= cart_item.product.stock:
+    if 0 < quantity <= cart_item.product.stock:
         cart_item.quantity = quantity
         cart_item.save()
     else:
-        messages.warning(request, 'Cantidad no válida.')
+        messages.warning(request, 'Cantidad no valida.')
     return redirect('carrito:cart_detail')
 
 
@@ -64,15 +65,18 @@ def checkout(request):
     cart = get_cart(request)
     items = cart.items.select_related('product')
     if not items.exists():
-        messages.warning(request, 'Tu carrito está vacío.')
+        messages.warning(request, 'Tu carrito esta vacio.')
         return redirect('tienda:home')
 
     if request.method == 'POST':
+        from panel_admin.models import Pago
+
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         address = request.POST.get('address')
         city = request.POST.get('city')
         phone = request.POST.get('phone')
+        metodo_pago = request.POST.get('metodo_pago', 'credit_card')
 
         order = Order.objects.create(
             user=request.user,
@@ -95,7 +99,17 @@ def checkout(request):
             product.stock -= item.quantity
             product.save()
 
+        Pago.objects.create(
+            user=request.user,
+            order_id=str(order.order_id),
+            metodo_pago=metodo_pago,
+            monto=cart.total,
+            estado='approved' if metodo_pago != 'efectivo' else 'pending',
+            referencia=f'Pago {metodo_pago} - {order.order_id}',
+        )
+
         cart.items.all().delete()
+        messages.success(request, 'Pedido realizado exitosamente!')
         return redirect('carrito:order_complete', order_id=order.order_id)
 
     return render(request, 'carrito/checkout.html', {

@@ -1,0 +1,91 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% load humanize %}
+{% block title %}Cupones - Panel Admin{% endblock %}
+{% block topbar_title %}Gestion de Cupones{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="panel-card">
+        <h3><i class="fas fa-ticket"></i> Cupones ({{ cupones.count }})</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Descuento</th>
+                    <th>Usos</th>
+                    <th>Min. Compra</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cupon in cupones %}
+                <tr>
+                    <td><strong style="font-family: monospace; background: var(--light); padding: 3px 8px; border-radius: 4px;">{{ cupon.codigo }}</strong></td>
+                    <td><span style="color: var(--success); font-weight: 700; font-size: 1.05rem;">{{ cupon.descuento }}%</span></td>
+                    <td>{{ cupon.uso_actual }} / {{ cupon.uso_maximo }}</td>
+                    <td>${{ cupon.minimo_compra|intcomma }}</td>
+                    <td>{{ cupon.expira|date:"d/m/Y"|default:"Sin limite" }}</td>
+                    <td>
+                        {% if cupon.esta_disponible %}
+                            <span class="badge-status badge-delivered">Activo</span>
+                        {% else %}
+                            <span class="badge-status badge-cancelled">Agotado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'panel_admin:cupon_editar' cupon.id %}" class="btn btn-primary btn-sm" title="Editar">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <a href="{% url 'panel_admin:cupon_delete' cupon.id %}" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('Eliminar cupon {{ cupon.codigo }}?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-ticket" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                        No hay cupones creados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel-card">
+        <h3><i class="fas fa-plus"></i> {% if form.instance.pk %}Editar Cupon{% else %}Crear Cupon{% endif %}</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Codigo del Cupon</label>
+                {{ form.codigo }}
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-percent"></i> Descuento (%)</label>
+                {{ form.descuento }}
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-shopping-cart"></i> Compra Minima ($)</label>
+                {{ form.minimo_compra }}
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-redo"></i> Usos Maximos</label>
+                {{ form.uso_maximo }}
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Vencimiento</label>
+                {{ form.expira }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.activo }} Activo</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-save"></i> {% if form.instance.pk %}Actualizar{% else %}Crear Cupon{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

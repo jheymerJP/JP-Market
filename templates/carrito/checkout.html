@@ -18,59 +18,191 @@
             <div class="form-section">
                 <h3><i class="fas fa-user"></i> Datos Personales</h3>
                 <div class="form-group">
-                    <label for="full_name">Nombre Completo</label>
+                    <label for="full_name">Nombre Completo *</label>
                     <input type="text" name="full_name" id="full_name" class="form-control" required
-                           value="{{ user.get_full_name|default:'' }}" placeholder="Tu nombre completo">
+                           value="{{ user.get_full_name|default:'' }}" placeholder="Juan Perez">
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email *</label>
                     <input type="email" name="email" id="email" class="form-control" required
                            value="{{ user.email|default:'' }}" placeholder="tu@email.com">
                 </div>
                 <div class="form-group">
-                    <label for="phone">Telefono</label>
+                    <label for="phone">Telefono *</label>
                     <input type="tel" name="phone" id="phone" class="form-control" required
                            value="{{ user.profile.phone|default:'' }}" placeholder="+57 300 123 4567">
+                </div>
+                <div class="form-group">
+                    <label for="cedula">Cedula / NIT</label>
+                    <input type="text" name="cedula" id="cedula" class="form-control"
+                           placeholder="1234567890">
                 </div>
             </div>
 
             <div class="form-section">
                 <h3><i class="fas fa-location-dot"></i> Direccion de Envio</h3>
                 <div class="form-group">
-                    <label for="address">Direccion Completa</label>
+                    <label for="address">Direccion Completa *</label>
                     <input type="text" name="address" id="address" class="form-control" required
-                           value="{{ user.profile.address|default:'' }}" placeholder="Calle, numero, barrio">
+                           value="{{ user.profile.address|default:'' }}" placeholder="Calle 123 #45-67, Apto 101">
                 </div>
                 <div class="form-group">
-                    <label for="city">Ciudad</label>
+                    <label for="city">Ciudad *</label>
                     <input type="text" name="city" id="city" class="form-control" required
-                           value="{{ user.profile.city|default:'' }}" placeholder="Ciudad">
+                           value="{{ user.profile.city|default:'' }}" placeholder="Bogota">
+                </div>
+                <div class="form-group">
+                    <label for="barrio">Barrio</label>
+                    <input type="text" name="barrio" id="barrio" class="form-control"
+                           placeholder="Chapinero">
+                </div>
+                <div class="form-group">
+                    <label for="notas">Notas de entrega</label>
+                    <input type="text" name="notas" id="notas" class="form-control"
+                           placeholder="Ej: Entregar despues de las 6pm">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-credit-card"></i> Metodo de Pago</h3>
+                <p style="color: var(--dark-soft); font-size: 0.88rem; margin-bottom: 18px;">
+                    <i class="fas fa-lock"></i> Todos los pagos son 100% seguros y encriptados
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="credit_card" checked style="accent-color: var(--primary);">
+                        <i class="fas fa-credit-card" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">Tarjeta de Credito</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">Visa, Mastercard, AMEX</p>
+                        </div>
+                    </label>
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="debit_card" style="accent-color: var(--primary);">
+                        <i class="fas fa-money-check" style="color: var(--success); font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">Tarjeta de Debito</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">PSE, Daviplata</p>
+                        </div>
+                    </label>
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="pse" style="accent-color: var(--primary);">
+                        <i class="fas fa-university" style="color: var(--info); font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">PSE</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">Transferencia bancaria</p>
+                        </div>
+                    </label>
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="nequi" style="accent-color: var(--primary);">
+                        <i class="fas fa-mobile-alt" style="color: #00c4cc; font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">Nequi</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">Pago movil</p>
+                        </div>
+                    </label>
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="daviplata" style="accent-color: var(--primary);">
+                        <i class="fas fa-mobile-alt" style="color: #ff6b35; font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">Daviplata</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">Pago movil</p>
+                        </div>
+                    </label>
+                    <label class="payment-option" style="display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid var(--gray-light); border-radius: var(--radius); cursor: pointer; transition: all 0.3s;">
+                        <input type="radio" name="metodo_pago" value="efectivo" style="accent-color: var(--primary);">
+                        <i class="fas fa-money-bill-wave" style="color: var(--secondary); font-size: 1.2rem;"></i>
+                        <div>
+                            <strong style="font-size: 0.88rem;">Efectivo</strong>
+                            <p style="font-size: 0.75rem; color: var(--gray);">Contra entrega</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="cardFields" style="padding: 20px; background: var(--light); border-radius: var(--radius); margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Numero de Tarjeta</label>
+                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label>Vencimiento</label>
+                            <input type="text" class="form-control" placeholder="MM/AA" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" class="form-control" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre en la Tarjeta</label>
+                        <input type="text" class="form-control" placeholder="JUAN PEREZ">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <img src="https://img.icons8.com/color/40/visa.png" alt="Visa" style="height: 28px;">
+                    <img src="https://img.icons8.com/color/40/mastercard.png" alt="Mastercard" style="height: 28px;">
+                    <img src="https://img.icons8.com/color/40/amex.png" alt="AMEX" style="height: 28px;">
+                    <img src="https://img.icons8.com/color/40/pse.png" alt="PSE" style="height: 28px;">
+                    <img src="https://img.icons8.com/color/40/nequi.png" alt="Nequi" style="height: 28px;">
+                </div>
+
+                <div style="padding: 14px; background: rgba(0, 184, 148, 0.05); border: 1px solid rgba(0, 184, 148, 0.2); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--success);">
+                    <i class="fas fa-shield-halved"></i> <strong>Pago seguro:</strong> Tus datos estan protegidos con encriptacion SSL de 256 bits. No almacenamos datos de tarjeta.
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-ticket"></i> Codigo de Descuento</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" name="cupon" class="form-control" placeholder="Ingresa tu codigo" style="flex: 1;">
+                    <button type="button" class="btn btn-outline" onclick="alert('Codigo de descuento aplicado!')">
+                        <i class="fas fa-check"></i> Aplicar
+                    </button>
                 </div>
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg btn-block">
-                <i class="fas fa-check-circle"></i> Confirmar Pedido - ${{ cart.total|intcomma }}
+                <i class="fas fa-lock"></i> Confirmar Pedido - ${{ cart.total|intcomma }}
             </button>
         </form>
     </div>
 
     <div class="checkout-summary">
-        <h3><i class="fas fa-clipboard-list"></i> Resumen</h3>
+        <h3><i class="fas fa-clipboard-list"></i> Tu Pedido</h3>
         <div class="checkout-items">
             {% for item in items %}
             <div class="checkout-item">
-                <span>{{ item.quantity }}x {{ item.product.name|truncatechars:25 }}</span>
-                <span>${{ item.subtotal|intcomma }}</span>
+                <div>
+                    <span style="font-weight: 600;">{{ item.product.name|truncatechars:22 }}</span>
+                    <span style="color: var(--gray); font-size: 0.82rem;"> x{{ item.quantity }}</span>
+                </div>
+                <span style="font-weight: 700;">${{ item.subtotal|intcomma }}</span>
             </div>
             {% endfor %}
+        </div>
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>${{ cart.total|intcomma }}</span>
         </div>
         <div class="summary-row">
             <span>Envio</span>
             <span class="text-success"><i class="fas fa-check-circle"></i> Gratis</span>
         </div>
+        <div class="summary-row">
+            <span>Impuestos</span>
+            <span>Incluidos</span>
+        </div>
         <div class="summary-total">
             <span>Total a Pagar</span>
             <span>${{ cart.total|intcomma }}</span>
+        </div>
+
+        <div style="padding: 14px; background: var(--light); border-radius: var(--radius); margin-top: 15px; font-size: 0.82rem; color: var(--dark-soft);">
+            <p><i class="fas fa-truck"></i> Envio estimado: 24-48 horas</p>
+            <p style="margin-top: 6px;"><i class="fas fa-rotate-left"></i> Garantia de devolucion: 30 dias</p>
         </div>
     </div>
 </div>

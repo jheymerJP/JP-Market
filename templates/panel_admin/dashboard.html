@@ -1,0 +1,114 @@
+{% extends 'panel_admin/base_admin.html' %}
+{% load humanize %}
+{% block title %}Dashboard - Panel Admin{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-dollar-sign"></i></div>
+        <div class="stat-info">
+            <h3>${{ ventas_mes|intcomma }}</h3>
+            <p>Ventas del mes</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-shopping-bag"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_pedidos }}</h3>
+            <p>Total pedidos</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <h3>{{ pedidos_pendientes }}</h3>
+            <p>Pedidos pendientes</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_clientes }}</h3>
+            <p>Clientes registrados</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon teal"><i class="fas fa-box"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_productos }}</h3>
+            <p>Productos activos</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-info">
+            <h3>{{ productos_stock_bajo }}</h3>
+            <p>Stock bajo</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="panel-card">
+        <h3><i class="fas fa-chart-bar"></i> Ventas Ultimos 6 Meses</h3>
+        <div class="chart-placeholder">
+            {% for v in ventas_por_mes %}
+            {% if v.total > 0 %}
+            {% with porcentaje=v.total|floatformat:0 %}
+            <div class="chart-bar" style="height: {{ porcentaje }}%; background: linear-gradient(to top, var(--primary), var(--accent)); min-height: 30px;">
+                <span class="chart-bar-value">${{ v.total|floatformat:0 }}</span>
+                <span class="chart-bar-label">{{ v.mes }}</span>
+            </div>
+            {% endwith %}
+            {% else %}
+            <div class="chart-bar" style="height: 5%; background: var(--gray-light);">
+                <span class="chart-bar-label">{{ v.mes }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel-card">
+        <h3><i class="fas fa-trophy"></i> Top Productos</h3>
+        {% for p in top_productos %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--light);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 800; color: var(--primary);">{{ forloop.counter }}</span>
+                <span style="font-weight: 600;">{{ p.name|truncatechars:25 }}</span>
+            </div>
+            <span style="font-size: 0.82rem; color: var(--dark-soft);">{{ p.vendidos }} vendidos</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="panel-card">
+    <h3><i class="fas fa-receipt"></i> Pedidos Recientes</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Pedido</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos_recientes %}
+            <tr>
+                <td><strong>#{{ pedido.order_id|truncatechars:8 }}</strong></td>
+                <td>{{ pedido.full_name }}</td>
+                <td><strong>${{ pedido.total|intcomma }}</strong></td>
+                <td><span class="badge-status badge-{{ pedido.status }}">{{ pedido.get_status_display }}</span></td>
+                <td>{{ pedido.created|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--gray);">No hay pedidos aun</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
