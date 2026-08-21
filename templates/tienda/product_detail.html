@@ -1,44 +1,6 @@
 {% extends 'base.html' %}
 {% load static humanize %}
 {% block title %}{{ product.name }} - JP Market{% endblock %}
-{% block extra_css %}
-<style>
-.detail-section{padding:2rem 0}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
-.product-gallery{border-radius:16px;overflow:hidden;background:#f5f6fa;position:relative}
-.product-gallery img{width:100%;height:400px;object-fit:cover}
-.product-gallery .no-img{display:flex;align-items:center;justify-content:center;height:400px;font-size:5rem;color:#ddd}
-.product-detail-info h1{font-family:'Playfair Display',serif;font-size:2rem;color:#1a1a2e;margin-bottom:.5rem}
-.product-detail-info .category-badge{display:inline-block;background:#f0f0ff;color:#6c63ff;padding:.4rem 1rem;border-radius:20px;font-size:.85rem;font-weight:600;margin-bottom:1rem}
-.product-detail-info .price{font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,#6c63ff,#e91e63);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:1rem 0}
-.product-detail-info .stock-info{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.9rem}
-.stock-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.stock-dot.in-stock{background:#4caf50}
-.stock-dot.low-stock{background:#ff9800}
-.stock-dot.out-stock{background:#f44336}
-.product-detail-info .description{color:#555;line-height:1.8;margin:1.5rem 0;padding:1.5rem;background:#f9f9f9;border-radius:12px}
-.product-detail-info .rating{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;color:#ffc107}
-.quantity-selector{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
-.qty-btn{width:40px;height:40px;border-radius:50%;border:2px solid #e0e0e0;background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.qty-btn:hover{border-color:#6c63ff;color:#6c63ff}
-.qty-input{width:60px;height:40px;border:2px solid #e0e0e0;border-radius:8px;text-align:center;font-size:1.1rem;font-weight:600}
-.detail-actions{display:flex;gap:1rem;margin-top:1.5rem}
-.btn-add-cart{flex:1;padding:1rem;border:none;border-radius:12px;background:linear-gradient(135deg,#6c63ff,#e91e63);color:#fff;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:.5rem}
-.btn-add-cart:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,.4)}
-.btn-whatsapp{padding:1rem 1.5rem;border:2px solid #25d366;border-radius:12px;background:transparent;color:#25d366;font-size:1.1rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:.5rem;text-decoration:none}
-.btn-whatsapp:hover{background:#25d366;color:#fff}
-.related-section{padding:2rem 0;margin-top:2rem;border-top:1px solid #eee}
-.reviews-section{padding:2rem 0;margin-top:2rem;border-top:1px solid #eee}
-.review-card{background:#f9f9f9;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-.review-card .review-header{display:flex;justify-content:space-between;margin-bottom:.5rem}
-.review-card .review-user{font-weight:600;color:#1a1a2e}
-.review-card .review-rating{color:#ffc107}
-.review-card .review-date{font-size:.8rem;color:#999}
-.review-card .review-title{font-weight:600;margin-bottom:.25rem}
-.review-card .review-text{color:#555;font-size:.9rem}
-@media(max-width:768px){.detail-grid{grid-template-columns:1fr;gap:1.5rem}.product-gallery img{height:250px}}
-</style>
-{% endblock %}
 {% block content %}
 <section class="detail-section">
     <div class="container">

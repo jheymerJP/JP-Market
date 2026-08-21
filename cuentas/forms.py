@@ -9,7 +9,6 @@ class UserRegistrationForm(forms.ModelForm):
     password1 = forms.CharField(label='Contrasena', widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Minimo 8 caracteres'}))
     password2 = forms.CharField(label='Confirmar contrasena', widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Repite tu contrasena'}))
     telefono = forms.CharField(max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': '999 888 777'}))
-    documento_numero = forms.CharField(max_length=11, required=False, widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'DNI o RUC'}))
 
     class Meta:
         model = User
@@ -35,7 +34,6 @@ class UserRegistrationForm(forms.ModelForm):
             user.save()
             UserProfile.objects.filter(user=user).update(
                 telefono=self.cleaned_data.get('telefono', ''),
-                documento_numero=self.cleaned_data.get('documento_numero', ''),
             )
         return user
 

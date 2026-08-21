@@ -1,42 +1,6 @@
 {% extends 'base.html' %}
 {% load static humanize %}
 {% block title %}Rastrear Pedido #{{ order.order_id }} - JP Market{% endblock %}
-{% block extra_css %}
-<style>
-.tracking-section{padding:2rem 0;min-height:70vh}
-.tracking-container{max-width:900px;margin:0 auto;padding:0 1rem}
-.tracking-header{text-align:center;margin-bottom:2rem}
-.tracking-header h1{font-family:'Playfair Display',serif;color:#1a1a2e;margin-bottom:.5rem}
-.tracking-header .order-number{font-size:1.2rem;color:#6c63ff;font-weight:600}
-.tracking-header .order-date{color:#666;margin-top:.25rem}
-.tracking-timeline{position:relative;padding:2rem 0}
-.timeline-track{position:absolute;left:30px;top:0;bottom:0;width:4px;background:#e0e0e0;border-radius:2px}
-.timeline-step{position:relative;padding-left:80px;margin-bottom:2rem;min-height:80px}
-.timeline-dot{position:absolute;left:18px;top:5px;width:28px;height:28px;border-radius:50%;background:#e0e0e0;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:2;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent}
-.timeline-step.done .timeline-dot{background:#4caf50;color:#fff}
-.timeline-step.current .timeline-dot{background:#6c63ff;color:#fff;box-shadow:0 0 0 6px rgba(108,99,255,.2);animation:pulse 2s infinite}
-.timeline-step.pending .timeline-dot{background:#e0e0e0;color:transparent}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(108,99,255,.2)}50%{box-shadow:0 0 0 12px rgba(108,99,255,.1)}}
-.timeline-content h3{font-size:1.1rem;color:#1a1a2e;margin:0 0 .25rem}
-.timeline-content p{color:#666;margin:0;font-size:.9rem}
-.timeline-step.current .timeline-content h3{color:#6c63ff;font-weight:700}
-.timeline-step.pending .timeline-content h3{color:#999}
-.timeline-step.pending .timeline-content p{color:#bbb}
-.tracking-details{background:#fff;border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-top:2rem}
-.tracking-details h2{font-family:'Playfair Display',serif;margin-bottom:1rem}
-.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem}
-.detail-item label{display:block;font-size:.8rem;color:#666;text-transform:uppercase;margin-bottom:.25rem}
-.detail-item span{font-weight:600;color:#1a1a2e}
-.tracking-details .order-items{margin-top:1.5rem;border-top:1px solid #eee;padding-top:1rem}
-.tracking-details .order-items h3{margin-bottom:.75rem}
-.tracking-details .item-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f5f5f5}
-.tracking-details .item-total{display:flex;justify-content:space-between;padding:1rem 0 0;font-size:1.1rem;font-weight:700}
-.back-btn{display:inline-flex;align-items:center;gap:.5rem;margin-top:2rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#6c63ff,#e91e63);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;text-decoration:none;transition:transform .2s}
-.back-btn:hover{transform:translateY(-2px)}
-.refresh-btn{display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;margin-left:1rem;padding:.5rem 1rem;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:background .2s;text-decoration:none;color:#333}
-.refresh-btn:hover{background:#e0e0e0}
-</style>
-{% endblock %}
 {% block content %}
 <section class="tracking-section">
     <div class="tracking-container">
